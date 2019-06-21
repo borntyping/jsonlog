@@ -8,7 +8,7 @@ __version__ = "0.1.1"
 from logging import FileHandler, StreamHandler, captureWarnings, getLogger, root
 
 from jsonlog.formatter import JSONFormatter
-from jsonlog.logging import (
+from jsonlog.config import (
     basicConfig,
     critical,
     debug,
