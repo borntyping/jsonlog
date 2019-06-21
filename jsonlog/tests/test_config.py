@@ -10,13 +10,6 @@ import jsonlog
 import jsonlog.tests.capture
 
 
-@pytest.fixture(autouse=True)
-def reset_logging():
-    """Reset the logging configuration every time we run a test."""
-    logging.root.handlers = []
-    logging.root.setLevel(logging.WARNING)
-
-
 def test_basic_config(capture: jsonlog.tests.capture.Capture):
     jsonlog.basicConfig()
     jsonlog.warning("Hello world")
