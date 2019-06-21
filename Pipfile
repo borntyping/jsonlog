@@ -8,6 +8,8 @@ black = "*"
 mypy = "*"
 pytest = "*"
 flake8 = "*"
+twine = "*"
+keyring = "*"
 
 [packages]
 
