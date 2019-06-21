@@ -20,6 +20,7 @@ from logging import (
     getLoggerClass,
     root,
     setLoggerClass,
+    getLogger,
 )
 
 from jsonlog.config import (
@@ -34,7 +35,6 @@ from jsonlog.config import (
     warning,
 )
 from jsonlog.formatter import JSONFormatter
-from jsonlog.logger import JSONLogger, getLogger
 
 __all__ = (
     "basicConfig",
@@ -55,7 +55,6 @@ __all__ = (
     "info",
     "INFO",
     "JSONFormatter",
-    "JSONLogger",
     "log",
     "NOTSET",
     "root",

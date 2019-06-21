@@ -6,7 +6,6 @@ import typing
 import warnings
 
 import jsonlog.formatter
-import jsonlog.logger
 
 
 def basicConfig(
@@ -50,7 +49,6 @@ def basicConfig(
         logging._acquireLock()  # type: ignore
         logging.root.addHandler(handler)
         logging.root.setLevel(level)
-        logging.setLoggerClass(jsonlog.logger.JSONLogger)
     finally:
         logging._releaseLock()  # type: ignore
 
