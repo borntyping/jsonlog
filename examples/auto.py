@@ -1,3 +1,5 @@
+"""The jsonlog formatter is configured when you call module-level functions."""
+
 import jsonlog
 
-jsonlog.warning("User clicked a button", {"user": 123})
+jsonlog.warning("User %(user)s clicked a button", {"user": 123})

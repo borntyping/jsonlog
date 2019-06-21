@@ -1,4 +1,4 @@
-"""Wrappers for the `logging` library."""
+"""Wrappers for the `logging` module."""
 
 import functools
 import logging

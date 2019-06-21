@@ -1,8 +1,11 @@
 jsonlog
 =======
 
-A drop-in formatter for Python's `logging` library that outputs messages as line
+A drop-in formatter for Python's `logging` module that outputs messages as line
 delimited JSON.
+
+While `jsonlog` provides it's own `basicConfig` method so you can get started
+quickly, all of it's features and classes can be used with the `logging` module.
 
 Usage
 -----
@@ -11,11 +14,20 @@ You can use `jsonlog` as a drop-in replacement for `logging`:
 
 ```python
 import jsonlog
+
+jsonlog.warning("Hello world.")
+```
+
+It's implemented as a log formatter, so you can use `logging` just like you
+normally would.
+
+```python
+import jsonlog
 import logging
 
 jsonlog.basicConfig(level=jsonlog.INFO)
-jsonlog.info("Works with functions in the jsonlog module.")
-logging.info("And works with functions in the logging module.")
+jsonlog.warning("Works with functions in the jsonlog module.")
+logging.warning("And works with functions in the logging module.")
 ```
 
 ### Configuration using `jsonlog.basicConfig`
@@ -61,46 +73,31 @@ logging.config.dictConfig(
 
 ### Adding extra attributes to JSON output
 
-If `LogRecord.args` is a mapping, the values in the mapping will be included in
-the JSON object the formatter creates.
+Record attributes provided with `extra=` will be included in the JSON object.
 
 ```python
 import jsonlog
+import logging
 
-jsonlog.warning("User clicked a button", {"user": 123})
+jsonlog.basicConfig()
+logging.warning("User clicked a button", extra={"user": 123})
 ```
 
 ```
 {"time": "2019-06-21T16:25:05.823190", "level": "WARNING", "message": "User clicked a button", "user": 123}
 ```
 
-### Passing extra attributes as keyword arguments.
-
-The `jsonlog.logger.JSONLogger` class modifies the signature of `.log()` and
-it's related methods to accept arbitrary keyword arguments. These are stored in
-a record's `args` attributes as a map.
-
-You can't use this feature on the root logger (and any module level methods that
-use the root logger). Loggers created before `jsonlog.basicConfig` is called may
-still be `logging.Logger` instances - if you want to ensure they are
-`jsonlog.JSONLogger` instances use `jsonlog.getLogger` to create them.
+If a mapping is passed as the only positional argument, attributes from the
+mapping will also be included.
 
 ```python
 import jsonlog
-
-jsonlog.warning("User clicked a button", user=123)
-```
-
-The `jsonlog.logger.JSONLogger` class will be automatically installed as the
-default logger class when `jsonlog.basicConfig()` is called. You can also
-manually configure it as the default logger class:
-
-```python
 import logging
-import jsonlog
 
-logging.setLoggerClass(jsonlog.JSONLogger)
+jsonlog.basicConfig()
+logging.warning("User clicked a button", {"user": 123})
 ```
+
 
 Compatibility
 -------------
