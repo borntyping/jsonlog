@@ -10,6 +10,8 @@ pytest = "*"
 flake8 = "*"
 twine = "*"
 keyring = "*"
+pytest-cov = "*"
+coverage = "*"
 
 [packages]
 

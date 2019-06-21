@@ -3,6 +3,7 @@
 import functools
 import logging
 import typing
+import warnings
 
 import jsonlog.formatter
 
@@ -27,7 +28,7 @@ def basicConfig(
     """
     if logging.root.handlers:
         # The original basicConfig silently does nothing when handlers are configured.
-        raise Exception("Logging handlers are already configured")
+        warnings.warn("Logging handlers are already configured")
 
     if stream and filename:
         raise ValueError("'stream' and 'filename' should not be specified together")

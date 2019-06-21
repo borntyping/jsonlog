@@ -1,5 +1,7 @@
 import logging
 
+import pytest
+
 import jsonlog.formatter
 
 
@@ -23,3 +25,8 @@ def test_indent(record: logging.LogRecord) -> None:
 def test_keys(record: logging.LogRecord) -> None:
     line = jsonlog.formatter.JSONFormatter(keys=["level", "message"]).format(record)
     assert line == '{"level": "INFO", "message": "An example log message"}'
+
+
+def test_empty_keys():
+    with pytest.raises(ValueError):
+        jsonlog.formatter.JSONFormatter(keys=())
