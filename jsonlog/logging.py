@@ -10,9 +10,9 @@ import jsonlog.formatter
 def basicConfig(
     *,
     level: typing.Union[int, str] = logging.DEBUG,
-    keys: typing.Sequence[str] = (),
-    timespec: str = "auto",
-    indent: typing.Optional[int] = None,
+    indent: typing.Optional[int] = jsonlog.formatter.JSONFormatter.DEFAULT_INDENT,
+    keys: typing.Sequence[str] = jsonlog.formatter.JSONFormatter.DEFAULT_KEYS,
+    timespec: str = jsonlog.formatter.JSONFormatter.DEFAULT_TIMESPEC,
     filename: typing.Optional[str] = None,
     filemode: str = "a",
     stream: typing.Optional[typing.Any] = None
@@ -25,11 +25,14 @@ def basicConfig(
     `fmt` and `datefmt` are removed, and there is not support for providing your own
     handlers (use the `logging.config` module instead if you need to do this).
     """
-    logging.basicConfig()
+    if logging.root.handlers:
+        # The original basicConfig silently does nothing when handlers are configured.
+        raise Exception("Logging handlers are already configured")
 
     if stream and filename:
         raise ValueError("'stream' and 'filename' should not be specified together")
 
+    handler: logging.Handler
     if filename is not None:
         handler = logging.FileHandler(filename=filename, mode=filemode)
     else:
@@ -39,14 +42,14 @@ def basicConfig(
         keys=keys, timespec=timespec, indent=indent
     )
 
-    handler.setFormatter(formatter)
+    handler.setFormatter(formatter)  # type: ignore
 
     try:
-        logging._acquireLock()
+        logging._acquireLock()  # type: ignore
         logging.root.addHandler(handler)
         logging.root.setLevel(level)
     finally:
-        logging._releaseLock()
+        logging._releaseLock()  # type: ignore
 
 
 def ensure_handlers(func):

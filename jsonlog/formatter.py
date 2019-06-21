@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import collections.abc
 import json
@@ -8,6 +9,7 @@ JSONValue = typing.Union[str, int, float, None]
 JSON = typing.Mapping[str, JSONValue]
 
 
+@dataclasses.dataclass()
 class BaseJSONFormatter:
     """
     This class handles the basic translation of a LogRecord to JSON.
@@ -19,13 +21,10 @@ class BaseJSONFormatter:
     formatting and date formatting are removed.
     """
 
-    def __init__(self, *, indent: typing.Optional[int] = None):
-        """
-        Create a BaseJSONFormatter instance. Only keyword arguments are provided.
+    DEFAULT_INDENT: typing.ClassVar[typing.Optional[int]] = None
 
-        * `indent` is passed to `json.dumps()` to format JSON objects.
-        """
-        self.indent = indent
+    # Passed to `json.dumps()` to format JSON objects.
+    indent: typing.Optional[int] = dataclasses.field(default=DEFAULT_INDENT)
 
     def format(self, record: logging.LogRecord) -> str:
         """
@@ -85,6 +84,7 @@ class BaseJSONFormatter:
         return payload
 
 
+@dataclasses.dataclass()
 class JSONFormatter(BaseJSONFormatter):
     """
     Formats Python log messages as JSON.
@@ -96,23 +96,18 @@ class JSONFormatter(BaseJSONFormatter):
     formatting in the message (this is done by `LogRecord.formatMessage()`.
     """
 
-    DEFAULT_KEYS = ("time", "level", "message")
+    DEFAULT_KEYS: typing.ClassVar[typing.Sequence[str]] = ("time", "level", "message")
+    DEFAULT_TIMESPEC: typing.ClassVar[str] = "auto"
 
-    def __init__(
-        self,
-        *,
-        keys: typing.Sequence[str] = DEFAULT_KEYS,
-        timespec: str = "auto",
-        indent: typing.Optional[int] = None
-    ):
-        """
-        * `keys` is used to select the keys that should appear in the output.
-        * `timespec` is passed to `datetime.datetime.isoformat()` to format timestamps.
-        * `indent` is passed to `json.dumps()` to format JSON objects.
-        """
-        super().__init__(indent=indent)
-        self.keys = keys
-        self.timespec = timespec
+    # Selects the keys that are included in the JSON object
+    keys: typing.Sequence[str] = dataclasses.field(default=DEFAULT_KEYS)
+
+    # Passed to `datetime.datetime.isoformat()` to format timestamps.
+    timespec: str = dataclasses.field(default=DEFAULT_TIMESPEC)
+
+    def __post_init__(self):
+        if not self.keys:
+            raise ValueError("'keys' may not be empty")
 
     def format_time(self, time: float) -> JSONValue:
         """Timestamps are printed as ISO 8601 representations."""

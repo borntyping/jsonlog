@@ -21,13 +21,14 @@ from jsonlog.logging import (
 )
 
 __all__ = (
-    "captureWarnings",
     "basicConfig",
+    "captureWarnings",
     "critical",
     "debug",
     "error",
     "exception",
     "exception",
+    "fatal",
     "FileHandler",
     "getLogger",
     "info",
