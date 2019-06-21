@@ -55,16 +55,3 @@ def test_dict_config(capture: jsonlog.tests.capture.Capture):
     )
     logging.warning("Hello world")
     assert '"message": "Hello world"' in capture
-
-
-def test_args(capture: jsonlog.tests.capture.Capture):
-    jsonlog.basicConfig()
-    logging.warning("Hello world", {"key": "value"})
-    assert '"key": "value"' in capture
-
-
-@pytest.mark.parametrize("thing", ("world", "universe", "python"))
-def test_args_percent(capture: jsonlog.tests.capture.Capture, thing: str):
-    jsonlog.basicConfig()
-    logging.warning("Hello %(thing)s", {"thing": thing})
-    assert f"Hello {thing}" in capture
