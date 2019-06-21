@@ -1,5 +1,9 @@
-import pytest
 import logging
+
+import _pytest.capture
+import pytest
+
+import jsonlog.tests.capture
 
 
 @pytest.fixture()
@@ -13,3 +17,8 @@ def record() -> logging.LogRecord:
         args={},
         exc_info=None,
     )
+
+
+@pytest.fixture(autouse=True)
+def capture(capsys: _pytest.capture.CaptureResult) -> jsonlog.tests.capture.Capture:
+    return jsonlog.tests.capture.Capture(capsys)

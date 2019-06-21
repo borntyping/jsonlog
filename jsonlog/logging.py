@@ -9,13 +9,13 @@ import jsonlog.formatter
 
 def basicConfig(
     *,
-    level: typing.Union[int, str] = logging.DEBUG,
+    level: typing.Union[int, str] = logging.WARNING,
     indent: typing.Optional[int] = jsonlog.formatter.JSONFormatter.DEFAULT_INDENT,
     keys: typing.Sequence[str] = jsonlog.formatter.JSONFormatter.DEFAULT_KEYS,
     timespec: str = jsonlog.formatter.JSONFormatter.DEFAULT_TIMESPEC,
     filename: typing.Optional[str] = None,
     filemode: str = "a",
-    stream: typing.Optional[typing.Any] = None
+    stream: typing.Optional[typing.Any] = None,
 ) -> None:
     """
     Works like logging.basicConfig but configures a JSON formatter.
