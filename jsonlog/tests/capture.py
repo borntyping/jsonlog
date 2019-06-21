@@ -10,7 +10,7 @@ class Capture:
     output: typing.Optional[str] = dataclasses.field(init=False, default=None)
 
     def __repr__(self) -> str:
-        return f"Capture[{self.stderr!r}]"  # pragma: no cover
+        return f"Capture[{self.stderr.strip()!r}]"  # pragma: no cover
 
     @property
     def stderr(self) -> str:

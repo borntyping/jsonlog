@@ -5,6 +5,7 @@ import _pytest.capture
 import pytest
 
 import jsonlog.tests.capture
+import jsonlog.tests.records
 
 
 @pytest.fixture(autouse=True)
@@ -16,17 +17,15 @@ def reset_logging():
     logging.setLoggerClass(logging.Logger)
 
 
-@pytest.fixture()
-def record() -> logging.LogRecord:
-    return logging.LogRecord(
-        name="example",
-        level=logging.INFO,
-        pathname=__file__,
-        lineno=0,
-        msg="An example log message",
-        args={},
-        exc_info=None,
-    )
+@pytest.fixture(
+    params=[
+        jsonlog.tests.records.simple_record,
+        jsonlog.tests.records.error_record,
+        jsonlog.tests.records.extra_record,
+    ]
+)
+def record(request) -> logging.LogRecord:
+    return request.param()
 
 
 @pytest.fixture(autouse=True)
