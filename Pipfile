@@ -8,13 +8,14 @@ revelio = {editable = true,path = "."}
 
 [dev-packages]
 black = "*"
+coverage = "*"
+flake8 = "*"
+jsonlog = "*"
+keyring = "*"
 mypy = "*"
 pytest = "*"
-flake8 = "*"
-twine = "*"
-keyring = "*"
 pytest-cov = "*"
-coverage = "*"
+twine = "*"
 
 [requires]
 python_version = "3.7"
