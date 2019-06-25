@@ -49,7 +49,7 @@ class Record:
                 yield from textwrap.wrap(line, width=width)
 
 
-@click.command(name="revelio")
+@click.command(name="legere")
 @click.argument("stream", type=click.File(encoding="utf-8"), default="-")
 @click.option(
     "--level-key",

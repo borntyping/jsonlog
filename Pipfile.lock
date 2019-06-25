@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1c1a6586c599df6b47ffc63300738f6d722aab6983c3a1c5625d8dc9e7b5bfba"
+            "sha256": "53e7c489e14c2add0ea5f2bb037014a53960c91fc3fbbfa851991bff6ee94fca"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,6 +23,10 @@
             ],
             "version": "==7.0"
         },
+        "legere": {
+            "editable": true,
+            "path": "."
+        },
         "pyyaml": {
             "hashes": [
                 "sha256:57acc1d8533cbe51f6662a55434f0dbecfa2b9eaf115bede8f6fd00115a0c0d3",
@@ -38,10 +42,6 @@
                 "sha256:fe6a88094b64132c4bb3b631412e90032e8cfe9745a58370462240b8cb7553cd"
             ],
             "version": "==5.1.1"
-        },
-        "revelio": {
-            "editable": true,
-            "path": "."
         }
     },
     "develop": {
