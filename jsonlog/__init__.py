@@ -3,7 +3,7 @@ JSON log formatting for the Python logging module.
 """
 
 __authors__ = ["Sam Clements <sam@borntyping.co.uk>"]
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 from logging import (
     CRITICAL,

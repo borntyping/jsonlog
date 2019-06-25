@@ -82,9 +82,9 @@ class BaseJSONFormatter:
         # default implementation of `format_message` uses.
         attrs = {
             **attrs,
-            "message": self.format_message(record),
-            "time": self.format_time(record.created),
+            "timestamp": self.format_time(record.created),
             "level": self.format_level(record.levelno, record.levelname),
+            "message": self.format_message(record),
             "traceback": self.format_tb(record.exc_info) if record.exc_info else None,
         }
 
@@ -152,7 +152,7 @@ class JSONFormatter(BaseJSONFormatter):
     """
 
     DEFAULT_KEYS: typing.ClassVar[typing.Sequence[str]] = (
-        "time",
+        "timestamp",
         "level",
         "name",
         "message",

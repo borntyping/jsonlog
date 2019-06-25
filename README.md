@@ -19,7 +19,7 @@ jsonlog.warning("Hello world.")
 ```
 
 ```json
-{"time": "2019-06-21T19:06:25.285730", "level": "WARNING", "name": "root", "message": "Hello world."}
+{"timestamp": "2019-06-21T19:06:25.285730", "level": "WARNING", "name": "root", "message": "Hello world."}
 ```
 
 It's implemented as a log formatter, so you can use `logging` just like you
@@ -49,7 +49,7 @@ import jsonlog
 jsonlog.basicConfig(
     level=jsonlog.INFO,
     indent=None,
-    keys=("time", "level", "message"),
+    keys=("timestamp", "level", "message"),
     timespec="auto",
     # filename=None,
     # filemode="a",
@@ -88,7 +88,7 @@ logging.warning("User clicked a button", extra={"user": 123})
 ```
 
 ```json
-{"time": "2019-06-21T19:06:54.293929", "level": "WARNING", "name": "root", "message": "User clicked a button", "user": 123}
+{"timestamp": "2019-06-21T19:06:54.293929", "level": "WARNING", "name": "root", "message": "User clicked a button", "user": 123}
 ```
 
 If a mapping is passed as the only positional argument, attributes from the
@@ -112,7 +112,7 @@ python examples/hello.py 2> >(jq .)
 
 ```json
 {
-  "time": "2019-06-21T19:07:43.211782",
+  "timestamp": "2019-06-21T19:07:43.211782",
   "level": "WARNING",
   "name": "root",
   "message": "Hello world."
@@ -126,7 +126,7 @@ Tracebacks are included as a single string - it's not very nice to read, but
 means it'll play nicely with any systems that read the JSON logs you output.
 
 ```json
-{"time": "2019-06-21T19:08:37.326897", "level": "ERROR", "name": "root", "message": "Encountered an error", "traceback": "Traceback (most recent call last):\n  File \"examples/error.py\", line 6, in <module>\n    raise ValueError(\"Example exception\")\nValueError: Example exception"}
+{"timestamp": "2019-06-21T19:08:37.326897", "level": "ERROR", "name": "root", "message": "Encountered an error", "traceback": "Traceback (most recent call last):\n  File \"examples/error.py\", line 6, in <module>\n    raise ValueError(\"Example exception\")\nValueError: Example exception"}
 ```
 
 Tools like [jq] make it easy to extract and read the traceback:
