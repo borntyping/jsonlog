@@ -29,7 +29,9 @@ class BaseJSONFormatter:
     """
 
     DEFAULT_INDENT: typing.ClassVar[typing.Optional[int]] = None
-    RECORD_ATTRIBUTES: typing.ClassVar[typing.Set[str]] = {
+
+    # All attributes of a `logging.LogRecord`.
+    RECORD_KEYS: typing.ClassVar[typing.Set[str]] = {
         "name",
         "msg",
         "args",
@@ -52,6 +54,15 @@ class BaseJSONFormatter:
         "process",
     }
 
+    # Attributes of a `logging.LogRecord` we don't directly include in JSON output, as
+    # they are usually types that can't be serialized to JSON values. The `exc_info`
+    # attribute is still used to create the `traceback` string.
+    SPECIAL_KEYS: typing.ClassVar[typing.Set[str]] = {
+        "args",
+        "exc_info",
+        "stack_info",
+    }
+
     # Passed to `json.dumps()` to format JSON objects.
     indent: typing.Optional[int] = dataclasses.field(default=DEFAULT_INDENT)
 
@@ -71,10 +82,10 @@ class BaseJSONFormatter:
         # added using the `extra` argument. Attributes from `extra` are placed into a
         # LogRecords's `__dict__` by the `Logger.makeRecord` method, which makes it
         # difficult to discover and use them in a log message.
-        items = record.__dict__.items()
-        keys = self.RECORD_ATTRIBUTES
-        attrs: JSON = {k: v for k, v in items if k in keys and k != "exc_info"}
-        extra: JSON = {k: v for k, v in items if k not in keys}
+        attrs_keys = self.RECORD_KEYS - self.SPECIAL_KEYS
+        extra_keys = set(record.__dict__.keys()) - self.RECORD_KEYS - self.SPECIAL_KEYS
+        attrs: JSON = {k: getattr(record, k) for k in attrs_keys}
+        extra: JSON = {k: getattr(record, k) for k in extra_keys}
 
         # This adds some attributes generated from the record, all of which are
         # processed by a `format_*` method that can be overridden by a subclass. The
