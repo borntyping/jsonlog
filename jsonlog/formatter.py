@@ -57,11 +57,7 @@ class BaseJSONFormatter:
     # Attributes of a `logging.LogRecord` we don't directly include in JSON output, as
     # they are usually types that can't be serialized to JSON values. The `exc_info`
     # attribute is still used to create the `traceback` string.
-    SPECIAL_KEYS: typing.ClassVar[typing.Set[str]] = {
-        "args",
-        "exc_info",
-        "stack_info",
-    }
+    SPECIAL_KEYS: typing.ClassVar[typing.Set[str]] = {"args", "exc_info", "stack_info"}
 
     # Passed to `json.dumps()` to format JSON objects.
     indent: typing.Optional[int] = dataclasses.field(default=DEFAULT_INDENT)
@@ -176,10 +172,6 @@ class JSONFormatter(BaseJSONFormatter):
 
     # Passed to `datetime.datetime.isoformat()` to format timestamps.
     timespec: str = dataclasses.field(default=DEFAULT_TIMESPEC)
-
-    def extra_attributes(self, record: logging.LogRecord) -> JSON:
-        """If `record.args` is a mapping, we add the attributes to the payload."""
-        return record.args if isinstance(record.args, collections.abc.Mapping) else {}
 
     def format_time(self, time: float) -> JSONValue:
         """Timestamps are printed as ISO 8601 representations."""
