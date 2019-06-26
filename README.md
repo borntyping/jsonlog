@@ -51,5 +51,5 @@ Authors
 
 * [Sam Clements]
 
-[jsonlog]: https://gitlab.com/borntyping/jsonlog
+[jsonlog]: https://github.com/borntyping/jsonlog
 [Sam Clements]: https://gitlab.com/borntyping
