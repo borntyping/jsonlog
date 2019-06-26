@@ -24,10 +24,15 @@ class Record:
         color = COLORS.get(self.level)
         record = format_string.format_map(self.data)
         record = click.style(record, **color)
-        lines = self.lines(multiline_keys)
-        return "\n".join((record, *lines))
+        blocks = tuple(self.blocks(multiline_keys))
 
-    def lines(self, multiline_keys: typing.Sequence[str]) -> typing.Sequence[str]:
+        if blocks:
+            lines = "\n\n".join(blocks)
+            return f"{record}\n\n{lines}\n"
+
+        return record
+
+    def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Sequence[str]:
         indent = " " * 4
         width, _ = click.get_terminal_size()
         width = width - 2 * len(indent)
@@ -35,10 +40,10 @@ class Record:
         for key in multiline_keys:
             value = self.data.get(key)
             if value:
-                yield ""
-                for line in self.wrap_lines(value, width):
-                    yield indent + click.style(line, dim=True)
-                yield ""
+                lines = self.wrap_lines(value, width)
+                lines = (click.style(l, dim=True) for l in lines)
+                lines = (indent + l for l in lines)
+                yield "\n".join(lines)
 
     @staticmethod
     def wrap_lines(lines: str, width: int) -> typing.Iterable[str]:
