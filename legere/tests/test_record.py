@@ -20,12 +20,12 @@ class Example:
     [
         Example(
             Record({"timestamp": "2019-06-26", "message": "Hello World"}),
-            expected="2019-06-26 Hello World\x1b[0m",
+            expected="2019-06-26 Hello World",
             format_string="{timestamp} {message}",
         ),
         Example(
             Record({"@timestamp": "2019-06-26", "@message": "Hello World"}),
-            expected="2019-06-26 Hello World\x1b[0m",
+            expected="2019-06-26 Hello World",
             format_string="{@timestamp} {@message}",
         ),
         Example(
@@ -37,8 +37,9 @@ class Example:
     ],
 )
 def test_examples(example: Example):
-    assert example.expected == example.record.format(
+    actual = example.record.format(
         format_string=example.format_string,
         level_key=example.level_key,
         multiline_keys=example.multiline_keys,
     )
+    assert actual == example.expected

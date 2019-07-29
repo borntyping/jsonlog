@@ -9,6 +9,7 @@ from legere.record import Record
 @click.command(name="legere")
 @click.argument("stream", type=click.File(encoding="utf-8"), default="-")
 @click.option(
+    "-l",
     "--level-key",
     type=click.STRING,
     default="level",
@@ -24,7 +25,8 @@ from legere.record import Record
 )
 @click.option(
     "-m",
-    "--multiline-keys",
+    "--multiline-key",
+    "multiline_keys",
     type=click.STRING,
     multiple=True,
     default=["traceback"],

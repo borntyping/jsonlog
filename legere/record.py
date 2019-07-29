@@ -4,14 +4,7 @@ import typing
 
 import click
 
-COLORS = {
-    None: {},
-    "DEBUG": {},
-    "INFO": {"fg": "cyan"},
-    "WARNING": {"fg": "yellow"},
-    "ERROR": {"fg": "red"},
-    "CRITICAL": {"fg": "red", "bold": True},
-}
+from legere.colors import color
 
 
 @dataclasses.dataclass()
@@ -25,10 +18,12 @@ class Record:
         level_key: typing.Optional[str] = None,
         multiline_keys: typing.Sequence[str] = (),
     ) -> str:
-        color = COLORS.get(self.data.get(level_key))
-        record = format_string.format_map(self.data)
-        record = click.style(record, **color)
-        blocks = tuple(self.blocks(multiline_keys))
+        record: str = format_string.format_map(self.data)
+        blocks: typing.Tuple[str, ...] = tuple(self.blocks(multiline_keys))
+
+        # Extract a level and use it to color the record if possible.
+        level_value = self.data.get(level_key) if level_key else None
+        record = color(level_value, record) if level_value else record
 
         if blocks:
             lines = "\n\n".join(blocks)
@@ -36,13 +31,18 @@ class Record:
 
         return record
 
-    def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Sequence[str]:
+    @staticmethod
+    def color(level, message):
+        if level.casefold() == "info".casefold():
+            return click.style(message, fg="cyan")
+
+    def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:
         indent = " " * 4
         width, _ = click.get_terminal_size()
         width = width - 2 * len(indent)
 
         for key in multiline_keys:
-            value = self.data.get(key)
+            value = str(self.data.get(key))
             if value:
                 lines = self.wrap_lines(value, width)
                 lines = (click.style(l, dim=True) for l in lines)
