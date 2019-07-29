@@ -37,7 +37,7 @@ def main(
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
     for line in stream:
-        record = Record(json.loads(line))
+        record = Record.from_string(line)
         output = record.format(
             format_string=format_string,
             multiline_keys=multiline_keys,
