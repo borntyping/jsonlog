@@ -45,10 +45,13 @@ class Record:
 
         return record
 
-    def extract(self, key: str) -> RecordJSONValue:
+    def extract(self, key: str) -> typing.Optional[RecordJSONValue]:
         result = self.data
         for k in key.split("."):
-            result = result[k]
+            try:
+                result = result[k]
+            except KeyError:
+                return None
         return result
 
     def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:

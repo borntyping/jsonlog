@@ -3,7 +3,7 @@ import typing
 
 import pytest
 
-from legere.record import Record, RecordDict
+from legere.record import Record
 
 
 @dataclasses.dataclass()
