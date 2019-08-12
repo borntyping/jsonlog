@@ -7,7 +7,9 @@ import click
 
 from legere.colors import color
 
-RecordJSONValue = typing.Union[str, int, float, bool, typing.Sequence, typing.Mapping]
+RecordJSONValue = typing.Union[
+    None, str, int, float, bool, typing.Sequence, typing.Mapping
+]
 
 
 class RecordDict(dict, typing.Mapping[str, RecordJSONValue]):
@@ -32,20 +34,21 @@ class Record:
         level_key: typing.Optional[str] = None,
         multiline_keys: typing.Sequence[str] = (),
     ) -> str:
-        record: str = format_string.format_map(self.data)
+        message = format_string.format_map(self.data)
+        message = self.color(message, level_key)
+
+        # We add extra whitespace to a record if it has multiline strings.
         blocks: typing.Tuple[str, ...] = tuple(self.blocks(multiline_keys))
-
-        # Extract a level and use it to color the record if possible.
-        level_value = self.extract(level_key) if level_key else None
-        record = color(level_value, record) if level_value else record
-
         if blocks:
             lines = "\n\n".join(blocks)
-            return f"{record}\n\n{lines}\n"
+            return f"{message}\n\n{lines}\n"
 
-        return record
+        return message
 
-    def extract(self, key: str) -> typing.Optional[RecordJSONValue]:
+    def extract(self, key: typing.Optional[str]) -> RecordJSONValue:
+        if key is None:
+            return None
+
         result = self.data
         for k in key.split("."):
             try:
@@ -53,6 +56,15 @@ class Record:
             except KeyError:
                 return None
         return result
+
+    def color(self, message: str, level_key: typing.Optional[str]) -> str:
+        """Extract a level and use it to color the record if possible."""
+        level_value = self.extract(level_key)
+
+        if not isinstance(level_value, str):
+            return message
+
+        return color(level_value, message)
 
     def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:
         indent = " " * 4
