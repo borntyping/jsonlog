@@ -3,7 +3,7 @@ import typing
 
 import pytest
 
-from legere.record import Record
+from jsonlog_cli.record import Record
 
 
 @dataclasses.dataclass()

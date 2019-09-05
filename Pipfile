@@ -4,13 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-legere = {editable = true,path = "."}
+jsonlog = "*"
 
 [dev-packages]
 black = "*"
 coverage = "*"
 flake8 = "*"
-jsonlog = "*"
 keyring = "*"
 mypy = "*"
 pytest = "*"

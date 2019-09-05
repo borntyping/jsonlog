@@ -1,4 +1,4 @@
-from legere.cli import main
+from jsonlog_cli.cli import main
 
 if __name__ == "__main__":
     main()

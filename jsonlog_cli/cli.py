@@ -2,10 +2,10 @@ import typing
 
 import click
 
-from legere.record import Record
+from jsonlog_cli.record import Record
 
 
-@click.command(name="legere")
+@click.command(name="jsonlog_cli")
 @click.argument("stream", type=click.File(encoding="utf-8"), default="-")
 @click.option(
     "-l",

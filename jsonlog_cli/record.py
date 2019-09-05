@@ -5,7 +5,7 @@ import typing
 
 import click
 
-from legere.colors import color
+from jsonlog_cli.colors import color
 
 RecordJSONValue = typing.Union[
     None, str, int, float, bool, typing.Sequence, typing.Mapping
