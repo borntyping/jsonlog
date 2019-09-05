@@ -1,15 +1,32 @@
+from __future__ import annotations
+
 import dataclasses
 import json
 import textwrap
 import typing
 
 import click
+import jsonlog
 
-from jsonlog_cli.colors import color
+import jsonlog_cli.colors
+import jsonlog_cli.config
+
+log = jsonlog.getLogger(__name__)
 
 RecordJSONValue = typing.Union[
     None, str, int, float, bool, typing.Sequence, typing.Mapping
 ]
+
+
+@dataclasses.dataclass()
+class Pattern:
+    template: str
+    level_key: typing.Optional[str] = None
+    multiline_keys: typing.Sequence[str] = tuple()
+
+    def replace(self, **changes: typing.Any) -> Pattern:
+        changes = {k: v for k, v in changes.items() if v is not None}
+        return dataclasses.replace(self, **changes)
 
 
 class RecordDict(dict, typing.Mapping[str, RecordJSONValue]):
@@ -27,18 +44,12 @@ class Record:
     def from_string(cls, value: str):
         return cls(json.loads(value, object_hook=RecordDict))
 
-    def format(
-        self,
-        format_string: str,
-        *,
-        level_key: typing.Optional[str] = None,
-        multiline_keys: typing.Sequence[str] = (),
-    ) -> str:
-        message = format_string.format_map(self.data)
-        message = self.color(message, level_key)
+    def format(self, pattern: Pattern) -> str:
+        message = pattern.template.format_map(self.data)
+        message = self.color(message, pattern.level_key)
 
         # We add extra whitespace to a record if it has multiline strings.
-        blocks: typing.Tuple[str, ...] = tuple(self.blocks(multiline_keys))
+        blocks: typing.Tuple[str, ...] = tuple(self.blocks(pattern.multiline_keys))
         if blocks:
             lines = "\n\n".join(blocks)
             return f"{message}\n\n{lines}\n"
@@ -64,7 +75,7 @@ class Record:
         if not isinstance(level_value, str):
             return message
 
-        return color(level_value, message)
+        return jsonlog_cli.colors.color(level_value, message)
 
     def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:
         indent = " " * 4

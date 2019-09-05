@@ -57,7 +57,7 @@ class Example:
 )
 def test_examples(example: Example):
     actual = example.record().format(
-        format_string=example.format_string,
+        template=example.format_string,
         level_key=example.level_key,
         multiline_keys=example.multiline_keys,
     )
