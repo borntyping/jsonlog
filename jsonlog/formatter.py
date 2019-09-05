@@ -1,11 +1,10 @@
-import collections.abc
 import dataclasses
 import datetime
 import json
 import logging
 import traceback
-import typing
 import types
+import typing
 
 JSONValue = typing.Union[str, int, float, None]
 JSON = typing.Mapping[str, JSONValue]

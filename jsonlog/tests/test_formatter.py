@@ -38,8 +38,6 @@ def test_json_args_map(capture: jsonlog.tests.capture.Capture):
     jsonlog.basicConfig()
     logging.warning("%(action)s %(thing)s", {"action": "Hello", "thing": "World"})
     assert f"Hello World" in capture
-    assert f'"action": "Hello"' in capture
-    assert f'"thing": "World"' in capture
 
 
 def test_json_extra(capture: jsonlog.tests.capture.Capture):
