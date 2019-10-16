@@ -25,7 +25,7 @@ class Pattern:
     multiline_keys: typing.Sequence[str] = tuple()
 
     def replace(self, **changes: typing.Any) -> Pattern:
-        changes = {k: v for k, v in changes.items() if v is not None}
+        changes = {k: v for k, v in changes.items() if v}
         return dataclasses.replace(self, **changes)
 
 
