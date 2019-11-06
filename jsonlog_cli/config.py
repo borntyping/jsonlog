@@ -2,23 +2,29 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import logging
 import pathlib
 import typing
 
 import jsonschema
 import xdg
 
-import logging
-
 import jsonlog_cli.record
 
 log = logging.getLogger(__name__)
 
 DEFAULT_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
+DEFAULT_CONFIG = {
+    "jsonlog": jsonlog_cli.record.Pattern(
+        template="{timestamp} {level} {name} {message}",
+        level_key="level",
+        multiline_keys=("traceback",),
+    ),
+}
 CONFIG_SCHEMA = {
     "type": "object",
     "properties": {
-        "patterns": {"type": "object", "additionalProperties": {"$ref": "#pattern"}}
+        "patterns": {"type": "object", "additionalProperties": {"$ref": "#/definitions/pattern"}}
     },
     "definitions": {
         "pattern": {
@@ -43,15 +49,7 @@ class Config:
 
     @classmethod
     def configure(cls, path: typing.Optional[str]) -> Config:
-        config = Config(
-            {
-                "jsonlog": jsonlog_cli.record.Pattern(
-                    template="{timestamp} {level} {name} {message}",
-                    level_key="level",
-                    multiline_keys=("traceback",),
-                )
-            }
-        )
+        config = Config(DEFAULT_CONFIG)
 
         if path is not None:
             log.info(f"Reading configuration from file = {path!r}")
@@ -65,5 +63,5 @@ class Config:
     def load(self, path: pathlib.Path) -> None:
         instance = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
-        for k, v in instance.get("patterns", {}):
+        for k, v in instance.get("patterns", {}).items():
             self.patterns[k] = jsonlog_cli.record.Pattern(**v)

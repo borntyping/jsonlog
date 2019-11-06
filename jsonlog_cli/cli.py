@@ -15,7 +15,7 @@ from jsonlog_cli.record import Record
     "config_path",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
     default=DEFAULT_PATH.as_posix(),
-    help="The key that contains each record's log level.",
+    help="A configuration file to load.",
 )
 @click.option(
     "-p",
@@ -31,7 +31,6 @@ from jsonlog_cli.record import Record
     "--level-key",
     "level_key",
     type=click.STRING,
-    default="level",
     metavar="KEY",
     help="Override the key for each record's log level.",
 )
