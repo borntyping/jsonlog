@@ -1,21 +1,39 @@
+import sys
 import typing
 
 import click
 import jsonlog
 
-from jsonlog_cli.config import Config, DEFAULT_PATH
-from jsonlog_cli.record import Record
+from jsonlog_cli.config import (
+    Config,
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_LOG_PATH,
+    ensure_log_path,
+)
+from jsonlog_cli.record import RecordState
 
 
 @click.command(name="jsonlog_cli")
-@click.argument("stream", type=click.File(encoding="utf-8"), default="-")
+@click.argument(
+    "streams", type=click.File(encoding="utf-8"), metavar="STREAM", nargs=-1
+)
 @click.option(
     "-c",
     "--config",
     "config_path",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
-    default=DEFAULT_PATH.as_posix(),
+    default=DEFAULT_CONFIG_PATH.as_posix(),
+    show_default=True,
     help="A configuration file to load.",
+)
+@click.option(
+    "-l",
+    "--log",
+    "log_path",
+    type=click.Path(file_okay=True, dir_okay=False, allow_dash=True),
+    default=DEFAULT_LOG_PATH.as_posix(),
+    show_default=True,
+    help="Path to write internal logs to.",
 )
 @click.option(
     "-p",
@@ -52,21 +70,25 @@ from jsonlog_cli.record import Record
     help="Override the multiline key for each record.",
 )
 def main(
-    stream,
+    streams: typing.Iterable[typing.TextIO],
     config_path: str,
+    log_path: str,
     pattern_name: str,
     level_key: typing.Optional[str],
     template: typing.Optional[str],
     multiline_keys: typing.Optional[typing.Sequence[str]],
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
-    jsonlog.basicConfig()
+    jsonlog.basicConfig(filename=ensure_log_path(log_path))
 
+    streams = streams or (sys.stdin,)
     config = Config.configure(config_path)
     pattern = config.patterns[pattern_name]
     pattern = pattern.replace(
         template=template, level_key=level_key, multiline_keys=multiline_keys
     )
 
-    for line in stream:
-        click.echo(Record.from_string(line).format(pattern))
+    with RecordState() as state:
+        for stream in streams:
+            for line in stream:
+                state.echo(line, pattern)

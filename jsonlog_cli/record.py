@@ -9,7 +9,7 @@ import click
 import jsonlog
 
 import jsonlog_cli.colors
-import jsonlog_cli.config
+import jsonlog_cli.text
 
 log = jsonlog.getLogger(__name__)
 
@@ -42,7 +42,12 @@ class Record:
 
     @classmethod
     def from_string(cls, value: str):
-        return cls(json.loads(value, object_hook=RecordDict))
+        try:
+            return cls(json.loads(value, object_hook=RecordDict))
+        except json.JSONDecodeError as error:
+            excerpt = textwrap.shorten(value, 100)
+            log.exception(f"Could not parse JSON from line {excerpt!r}")
+            raise error
 
     def format(self, pattern: Pattern) -> str:
         message = pattern.template.format_map(self.data)
@@ -78,19 +83,11 @@ class Record:
         return jsonlog_cli.colors.color(level_value, message)
 
     def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:
-        indent = " " * 4
-        width, _ = click.get_terminal_size()
-        width = width - 2 * len(indent)
-
         for key in multiline_keys:
             value = self.extract(key)
-
             if value:
                 string = self.value_to_string(value)
-                lines = self.wrap_lines(string, width)
-                lines = (click.style(l, dim=True) for l in lines)
-                lines = (indent + l for l in lines)
-                yield "\n".join(lines)
+                yield jsonlog_cli.text.multiline(string, dim=True)
 
     @staticmethod
     def value_to_string(value: RecordJSONValue) -> str:
@@ -105,10 +102,40 @@ class Record:
 
         return json.dumps(value, indent=2)
 
-    @staticmethod
-    def wrap_lines(lines: str, width: int) -> typing.Iterable[str]:
-        for line in lines.splitlines():
-            if len(line) < width:
-                yield line
-            else:
-                yield from textwrap.wrap(line, width=width)
+
+@dataclasses.dataclass()
+class RecordState:
+    """
+    Track the state of lines surrounding text we want to separate.
+
+    Used when we print lines that didn't parse as JSON.
+    """
+
+    error: bool = False
+    record_class: typing.Type[Record] = Record
+
+    def __enter__(self) -> RecordState:
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.toggle_normal_state()
+
+    def toggle_normal_state(self) -> None:
+        if self.error:
+            self.error = False
+            click.echo()
+
+    def toggle_error_state(self) -> None:
+        if not self.error:
+            self.error = True
+            click.echo()
+
+    def echo(self, line: str, pattern: Pattern):
+        try:
+            output = Record.from_string(line).format(pattern)
+        except json.JSONDecodeError:
+            self.toggle_error_state()
+            click.echo(jsonlog_cli.text.multiline(line, fg="red", dim=True))
+        else:
+            self.toggle_normal_state()
+            click.echo(output)
