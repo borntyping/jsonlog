@@ -43,7 +43,9 @@ class Record:
     @classmethod
     def from_string(cls, value: str):
         try:
-            return cls(json.loads(value, object_hook=RecordDict))
+            record = cls(json.loads(value, object_hook=RecordDict))
+            record.data["__message__"] = value.strip()
+            return record
         except json.JSONDecodeError as error:
             excerpt = textwrap.shorten(value, 100)
             log.exception(f"Could not parse JSON from line {excerpt!r}")

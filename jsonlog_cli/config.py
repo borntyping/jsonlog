@@ -20,7 +20,10 @@ DEFAULT_CONFIG = {
         template="{timestamp} {level} {name} {message}",
         level_key="level",
         multiline_keys=("traceback",),
-    )
+    ),
+    "highlight": jsonlog_cli.record.Pattern(
+        template="{__message__}", level_key="level", multiline_keys=()
+    ),
 }
 CONFIG_SCHEMA = {
     "type": "object",
