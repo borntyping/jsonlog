@@ -21,6 +21,7 @@ def critical(message: str) -> str:
 COLORS: typing.Mapping[str, typing.Callable[[str], str]] = {
     "INFO".casefold(): info,
     "WARNING".casefold(): warning,
+    "WARN".casefold(): warning,
     "ERROR".casefold(): error,
     "CRITICAL".casefold(): critical,
 }

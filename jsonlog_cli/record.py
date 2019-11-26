@@ -22,11 +22,19 @@ RecordJSONValue = typing.Union[
 class Pattern:
     template: str
     level_key: typing.Optional[str] = None
-    multiline_keys: typing.Sequence[str] = tuple()
+    multiline_keys: typing.Set[str] = dataclasses.field(default_factory=set)
 
     def replace(self, **changes: typing.Any) -> Pattern:
         changes = {k: v for k, v in changes.items() if v}
         return dataclasses.replace(self, **changes)
+
+    def add_multiline_keys(
+        self, multiline_keys: typing.Sequence[str], reset_multiline_keys: bool = False
+    ) -> Pattern:
+        multiline_keys: typing.Set[str] = set(multiline_keys)
+        if not reset_multiline_keys:
+            multiline_keys = multiline_keys | set(self.multiline_keys)
+        return dataclasses.replace(self, multiline_keys=multiline_keys)
 
 
 class RecordDict(dict, typing.Mapping[str, RecordJSONValue]):

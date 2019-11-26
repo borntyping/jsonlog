@@ -67,7 +67,14 @@ from jsonlog_cli.record import RecordState
     type=click.STRING,
     multiple=True,
     metavar="KEY",
-    help="Override the multiline key for each record.",
+    help="Add multiline keys to the pattern.",
+)
+@click.option(
+    "-M",
+    "--reset-multiline-keys",
+    "reset_multiline_keys",
+    is_flag=True,
+    help="Remove existing multiline keys from the pattern.",
 )
 def main(
     streams: typing.Iterable[typing.TextIO],
@@ -77,6 +84,7 @@ def main(
     level_key: typing.Optional[str],
     template: typing.Optional[str],
     multiline_keys: typing.Optional[typing.Sequence[str]],
+    reset_multiline_keys: bool,
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
     jsonlog.basicConfig(filename=ensure_log_path(log_path))
@@ -84,9 +92,8 @@ def main(
     streams = streams or (sys.stdin,)
     config = Config.configure(config_path)
     pattern = config.patterns[pattern_name]
-    pattern = pattern.replace(
-        template=template, level_key=level_key, multiline_keys=multiline_keys
-    )
+    pattern = pattern.replace(template=template, level_key=level_key)
+    pattern = pattern.add_multiline_keys(multiline_keys, reset_multiline_keys)
 
     with RecordState() as state:
         for stream in streams:
