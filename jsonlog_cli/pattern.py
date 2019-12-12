@@ -36,7 +36,7 @@ def template_from_keys(*keys: str) -> str:
 
 
 @dataclasses.dataclass()
-class Formatter:
+class Pattern:
     level_key: typing.Optional[str]
     multiline_keys: typing.Sequence[str]
 
@@ -66,20 +66,20 @@ class Formatter:
         color: Color = COLORS.get(level.casefold(), Color())
         return color
 
-    def replace(self, **changes: typing.Any) -> Formatter:
+    def replace(self, **changes: typing.Any) -> Pattern:
         changes = {k: v for k, v in changes.items() if v}
         return dataclasses.replace(self, **changes)
 
     def add_multiline_keys(
         self, multiline_keys: typing.Sequence[str], reset_multiline_keys: bool = False
-    ) -> Formatter:
+    ) -> Pattern:
         if not reset_multiline_keys:
             multiline_keys = list(itertools.chain(self.multiline_keys, multiline_keys))
         return dataclasses.replace(self, multiline_keys=multiline_keys)
 
 
 @dataclasses.dataclass()
-class TemplateFormatter(Formatter):
+class TemplatePattern(Pattern):
     template: str
 
     def format_message(self, record: Record) -> str:
@@ -87,7 +87,7 @@ class TemplateFormatter(Formatter):
 
 
 @dataclasses.dataclass()
-class KeyValueFormatter(Formatter):
+class KeyValuePattern(Pattern):
     keys: typing.Sequence[str]
 
     def format_message(self, record: Record) -> str:

@@ -9,7 +9,7 @@ import click
 import jsonlog
 
 import jsonlog_cli.text
-import jsonlog_cli.formatter
+import jsonlog_cli.pattern
 
 log = jsonlog.getLogger(__name__)
 
@@ -114,7 +114,7 @@ class RecordState:
             self.error = True
             click.echo()
 
-    def echo(self, line: str, formatter: jsonlog_cli.formatter.Formatter, color=None):
+    def echo(self, line: str, formatter: jsonlog_cli.pattern.Pattern, color=None):
         try:
             record = Record.from_string(line)
         except json.JSONDecodeError:

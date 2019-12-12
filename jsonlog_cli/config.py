@@ -9,7 +9,7 @@ import typing
 import jsonschema
 import xdg
 
-import jsonlog_cli.formatter
+import jsonlog_cli.pattern
 import jsonlog_cli.record
 
 log = logging.getLogger(__name__)
@@ -17,15 +17,15 @@ log = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
 DEFAULT_CONFIG = {
-    "jsonlog": jsonlog_cli.formatter.KeyValueFormatter(
+    "jsonlog": jsonlog_cli.pattern.KeyValuePattern(
         keys=("timestamp", "level", "name", "message"),
         level_key="level",
         multiline_keys=("traceback",),
     ),
-    "highlight": jsonlog_cli.formatter.TemplateFormatter(
+    "highlight": jsonlog_cli.pattern.TemplatePattern(
         template="{__message__}", level_key="level", multiline_keys=()
     ),
-    "elasticsearch": jsonlog_cli.formatter.KeyValueFormatter(
+    "elasticsearch": jsonlog_cli.pattern.KeyValuePattern(
         keys=(
             "timestamp",
             "level",
@@ -64,7 +64,7 @@ CONFIG_SCHEMA = {
 
 @dataclasses.dataclass()
 class Config:
-    patterns: typing.Dict[str, jsonlog_cli.formatter.Formatter] = dataclasses.field(
+    patterns: typing.Dict[str, jsonlog_cli.pattern.Pattern] = dataclasses.field(
         default_factory=dict
     )
 
@@ -85,7 +85,7 @@ class Config:
         instance = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
         for k, v in instance.get("patterns", {}).items():
-            self.patterns[k] = jsonlog_cli.formatter.TemplateFormatter(**v)
+            self.patterns[k] = jsonlog_cli.pattern.TemplatePattern(**v)
 
 
 def ensure_log_path(path: str) -> typing.Optional[str]:
