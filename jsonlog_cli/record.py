@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import dataclasses
-import itertools
 import json
 import textwrap
 import typing
@@ -9,41 +8,14 @@ import typing
 import click
 import jsonlog
 
-import jsonlog_cli.colors
 import jsonlog_cli.text
+import jsonlog_cli.formatter
 
 log = jsonlog.getLogger(__name__)
 
 RecordJSONValue = typing.Union[
     None, str, int, float, bool, typing.Sequence, typing.Mapping
 ]
-
-
-def template_from_keys(*keys: str) -> str:
-    return " ".join(
-        f"{click.style(f'{k}=', fg='white')}{{__json__[{k}]}}" for k in keys
-    )
-
-
-@dataclasses.dataclass()
-class Pattern:
-    template: str
-    level_key: typing.Optional[str] = None
-    multiline_keys: typing.Sequence[str] = dataclasses.field(default_factory=tuple)
-
-    def format(self, mapping: typing.Mapping[str, str]) -> str:
-        return self.template.format_map(mapping)
-
-    def replace(self, **changes: typing.Any) -> Pattern:
-        changes = {k: v for k, v in changes.items() if v}
-        return dataclasses.replace(self, **changes)
-
-    def add_multiline_keys(
-        self, multiline_keys: typing.Sequence[str], reset_multiline_keys: bool = False
-    ) -> Pattern:
-        if not reset_multiline_keys:
-            multiline_keys = list(itertools.chain(self.multiline_keys, multiline_keys))
-        return dataclasses.replace(self, multiline_keys=multiline_keys)
 
 
 class RecordDict(dict, typing.Mapping[str, RecordJSONValue]):
@@ -73,18 +45,6 @@ class Record:
             raise error
         return cls(message=message, json=data)
 
-    def format(self, pattern: Pattern) -> str:
-        message = pattern.format(self.json)
-        message = self.color(message, pattern.level_key)
-
-        # We add extra whitespace to a record if it has multiline strings.
-        blocks: typing.Tuple[str, ...] = tuple(self.blocks(pattern.multiline_keys))
-        if blocks:
-            lines = "\n\n".join(blocks)
-            return f"{message}\n\n{lines}\n"
-
-        return message
-
     def extract(self, key: typing.Optional[str]) -> RecordJSONValue:
         if key is None:
             return None
@@ -97,21 +57,21 @@ class Record:
                 return None
         return result
 
-    def color(self, message: str, level_key: typing.Optional[str]) -> str:
-        """Extract a level and use it to color the record if possible."""
-        level_value = self.extract(level_key)
-
-        if not isinstance(level_value, str):
-            return message
-
-        return jsonlog_cli.colors.color(level_value, message)
+    # def color(self, message: str, level_key: typing.Optional[str]) -> str:
+    #     """Extract a level and use it to color the record if possible."""
+    #     level_value = self.extract(level_key)
+    #
+    #     if not isinstance(level_value, str):
+    #         return message
+    #
+    #     return jsonlog_cli.colors.color(level_value, message)
 
     def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:
         for key in multiline_keys:
             value = self.extract(key)
             if value:
                 string = self.value_to_string(value)
-                yield jsonlog_cli.text.multiline(string, dim=True)
+                yield jsonlog_cli.text.format_multiline(string, dim=True)
 
     @staticmethod
     def value_to_string(value: RecordJSONValue) -> str:
@@ -154,12 +114,13 @@ class RecordState:
             self.error = True
             click.echo()
 
-    def echo(self, line: str, pattern: Pattern, color=None):
+    def echo(self, line: str, formatter: jsonlog_cli.formatter.Formatter, color=None):
         try:
-            output = Record.from_string(line).format(pattern)
+            record = Record.from_string(line)
         except json.JSONDecodeError:
             self.toggle_error_state()
-            output = jsonlog_cli.text.multiline(line, fg="red", dim=True)
+            output = jsonlog_cli.text.format_multiline(line, fg="red", dim=True)
         else:
             self.toggle_normal_state()
+            output = formatter.format_message(record)
         click.echo(output, color=color)

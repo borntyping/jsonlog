@@ -13,7 +13,7 @@ def wrap_lines(lines: str, width: int) -> typing.Iterable[str]:
             yield from textwrap.wrap(line, width=width)
 
 
-def multiline(string: str, indent: int = 4, **style: typing.Any) -> str:
+def format_multiline(string: str, indent: int = 4, **style: typing.Any) -> str:
     """Format a block of text with styling, indentation and wrapping."""
     width, _ = click.get_terminal_size()
     width = width - (2 * indent)
