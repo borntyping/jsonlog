@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import itertools
 import json
 import textwrap
 import typing
@@ -18,11 +19,20 @@ RecordJSONValue = typing.Union[
 ]
 
 
+def template_from_keys(*keys: str) -> str:
+    return " ".join(
+        f"{click.style(f'{k}=', fg='white')}{{__json__[{k}]}}" for k in keys
+    )
+
+
 @dataclasses.dataclass()
 class Pattern:
     template: str
     level_key: typing.Optional[str] = None
-    multiline_keys: typing.Set[str] = dataclasses.field(default_factory=set)
+    multiline_keys: typing.Sequence[str] = dataclasses.field(default_factory=tuple)
+
+    def format(self, mapping: typing.Mapping[str, str]) -> str:
+        return self.template.format_map(mapping)
 
     def replace(self, **changes: typing.Any) -> Pattern:
         changes = {k: v for k, v in changes.items() if v}
@@ -31,9 +41,8 @@ class Pattern:
     def add_multiline_keys(
         self, multiline_keys: typing.Sequence[str], reset_multiline_keys: bool = False
     ) -> Pattern:
-        multiline_keys: typing.Set[str] = set(multiline_keys)
         if not reset_multiline_keys:
-            multiline_keys = multiline_keys | set(self.multiline_keys)
+            multiline_keys = list(itertools.chain(self.multiline_keys, multiline_keys))
         return dataclasses.replace(self, multiline_keys=multiline_keys)
 
 
@@ -46,21 +55,26 @@ class RecordDict(dict, typing.Mapping[str, RecordJSONValue]):
 
 @dataclasses.dataclass()
 class Record:
-    data: RecordDict
+    message: str
+    json: RecordDict
+
+    def __post_init__(self) -> None:
+        self.json["__message__"] = self.message
+        self.json["__json__"] = self.json
 
     @classmethod
-    def from_string(cls, value: str):
+    def from_string(cls, message: str):
+        message = message.strip()
         try:
-            record = cls(json.loads(value, object_hook=RecordDict))
-            record.data["__message__"] = value.strip()
-            return record
+            data = json.loads(message, object_hook=RecordDict)
         except json.JSONDecodeError as error:
-            excerpt = textwrap.shorten(value, 100)
+            excerpt = textwrap.shorten(message, 100)
             log.exception(f"Could not parse JSON from line {excerpt!r}")
             raise error
+        return cls(message=message, json=data)
 
     def format(self, pattern: Pattern) -> str:
-        message = pattern.template.format_map(self.data)
+        message = pattern.format(self.json)
         message = self.color(message, pattern.level_key)
 
         # We add extra whitespace to a record if it has multiline strings.
@@ -75,7 +89,7 @@ class Record:
         if key is None:
             return None
 
-        result = self.data
+        result = self.json
         for k in key.split("."):
             try:
                 result = result[k]
@@ -140,12 +154,12 @@ class RecordState:
             self.error = True
             click.echo()
 
-    def echo(self, line: str, pattern: Pattern):
+    def echo(self, line: str, pattern: Pattern, color=None):
         try:
             output = Record.from_string(line).format(pattern)
         except json.JSONDecodeError:
             self.toggle_error_state()
-            click.echo(jsonlog_cli.text.multiline(line, fg="red", dim=True))
+            output = jsonlog_cli.text.multiline(line, fg="red", dim=True)
         else:
             self.toggle_normal_state()
-            click.echo(output)
+        click.echo(output, color=color)

@@ -22,7 +22,13 @@ DEFAULT_CONFIG = {
         multiline_keys=("traceback",),
     ),
     "highlight": jsonlog_cli.record.Pattern(
-        template="{__message__}", level_key="level", multiline_keys=()
+        template="{__message__}", level_key="level"
+    ),
+    "elasticsearch": jsonlog_cli.record.Pattern(
+        template=jsonlog_cli.record.template_from_keys(
+            "timestamp", "type", "component", "cluster.name", "node.name", "message"
+        ),
+        multiline_keys=("stacktrace",),
     ),
 }
 CONFIG_SCHEMA = {

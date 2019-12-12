@@ -10,6 +10,7 @@ from jsonlog_cli.config import (
     DEFAULT_LOG_PATH,
     ensure_log_path,
 )
+from jsonlog_cli.multiline import MultilineStream
 from jsonlog_cli.record import RecordState
 
 
@@ -85,6 +86,7 @@ def main(
     template: typing.Optional[str],
     multiline_keys: typing.Optional[typing.Sequence[str]],
     reset_multiline_keys: bool,
+    collect_multiline_json: bool = True,
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
     jsonlog.basicConfig(filename=ensure_log_path(log_path))
@@ -95,7 +97,10 @@ def main(
     pattern = pattern.replace(template=template, level_key=level_key)
     pattern = pattern.add_multiline_keys(multiline_keys, reset_multiline_keys)
 
+    if collect_multiline_json:
+        streams = [MultilineStream(stream) for stream in streams]
+
     with RecordState() as state:
         for stream in streams:
             for line in stream:
-                state.echo(line, pattern)
+                state.echo(line, pattern, color=True)
