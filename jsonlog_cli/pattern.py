@@ -37,8 +37,8 @@ def template_from_keys(*keys: str) -> str:
 
 @dataclasses.dataclass()
 class Pattern:
-    level_key: typing.Optional[str]
-    multiline_keys: typing.Sequence[str]
+    level_key: typing.Optional[str] = "level"
+    multiline_keys: typing.Sequence[str] = ()
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
@@ -80,7 +80,7 @@ class Pattern:
 
 @dataclasses.dataclass()
 class TemplatePattern(Pattern):
-    template: str
+    template: str = "{{__message__}}"
 
     def format_message(self, record: Record) -> str:
         return self.highlight_color(record).style(self.template.format_map(record.json))
@@ -88,7 +88,7 @@ class TemplatePattern(Pattern):
 
 @dataclasses.dataclass()
 class KeyValuePattern(Pattern):
-    keys: typing.Sequence[str]
+    keys: typing.Sequence[str] = ("__message__",)
 
     def format_message(self, record: Record) -> str:
         return " ".join(self.format_pair(record, key) for key in self.keys)

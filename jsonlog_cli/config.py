@@ -18,13 +18,9 @@ DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
 DEFAULT_CONFIG = {
     "jsonlog": jsonlog_cli.pattern.KeyValuePattern(
-        keys=("timestamp", "level", "name", "message"),
-        level_key="level",
-        multiline_keys=("traceback",),
+        keys=("timestamp", "level", "name", "message"), multiline_keys=("traceback",)
     ),
-    "highlight": jsonlog_cli.pattern.TemplatePattern(
-        template="{__message__}", level_key="level", multiline_keys=()
-    ),
+    "highlight": jsonlog_cli.pattern.TemplatePattern(template="{__message__}"),
     "elasticsearch": jsonlog_cli.pattern.KeyValuePattern(
         keys=(
             "timestamp",
@@ -35,7 +31,6 @@ DEFAULT_CONFIG = {
             "node.name",
             "message",
         ),
-        level_key="level",
         multiline_keys=("stacktrace",),
     ),
 }
