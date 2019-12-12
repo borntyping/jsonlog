@@ -13,12 +13,12 @@ def wrap_lines(lines: str, width: int) -> typing.Iterable[str]:
             yield from textwrap.wrap(line, width=width)
 
 
-def format_multiline(string: str, indent: int = 4, **style: typing.Any) -> str:
+def wrap_and_style_lines(string: str, indent: int = 4, **style: typing.Any) -> str:
     """Format a block of text with styling, indentation and wrapping."""
     width, _ = click.get_terminal_size()
     width = width - (2 * indent)
     start = " " * indent
     lines = wrap_lines(string, width)
-    lines = (click.style(l, **style) for l in lines)
-    lines = (start + l for l in lines)
+    lines = (click.style(line, **style) for line in lines)
+    lines = (start + line for line in lines)
     return "\n".join(lines)

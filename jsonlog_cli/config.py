@@ -32,6 +32,7 @@ DEFAULT_CONFIG = {
             "message",
         ),
         multiline_keys=("stacktrace",),
+        multiline_json=True,
     ),
 }
 CONFIG_SCHEMA = {

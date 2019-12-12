@@ -54,5 +54,5 @@ class Example:
     ],
 )
 def test_examples(example: Example):
-    actual = example.record().format(formatter=example.pattern)
+    actual = example.record().format_record(formatter=example.pattern)
     assert actual == example.expected, repr(actual)

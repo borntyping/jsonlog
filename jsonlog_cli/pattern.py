@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import dataclasses
 import itertools
+import json
 import typing
 
 import click
 
-from .record import Record
-from .text import format_multiline
+from .record import Record, RecordJSONValue
+from .text import wrap_and_style_lines
 
 Level = typing.Optional[str]
 
@@ -29,16 +30,11 @@ COLORS: typing.Mapping[str, Color] = {
 }
 
 
-def template_from_keys(*keys: str) -> str:
-    return " ".join(
-        f"{click.style(f'{k}=', fg='white')}{{__json__[{k}]}}" for k in keys
-    )
-
-
 @dataclasses.dataclass()
 class Pattern:
     level_key: typing.Optional[str] = "level"
     multiline_keys: typing.Sequence[str] = ()
+    multiline_json: bool = False
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
@@ -58,8 +54,24 @@ class Pattern:
         for key in self.multiline_keys:
             value = record.extract(key)
             if value:
-                string = record.value_to_string(value)
-                yield format_multiline(string, dim=True)
+                string = self.format_multiline_value(value)
+                yield wrap_and_style_lines(string, dim=True)
+
+    @staticmethod
+    def format_multiline_value(value: RecordJSONValue) -> str:
+        """
+        Transform a JSON value into something we can display in a multiline block.
+
+        Strings are left alone (as we don't want to add quotes), lists are treated as
+        individual lines, and any other values are dumped as indented JSON.
+        """
+        if isinstance(value, str):
+            return value
+
+        if isinstance(value, list):
+            return "\n".join(value)
+
+        return json.dumps(value, indent=2)
 
     def highlight_color(self, record: Record) -> Color:
         level: Level = record.extract(self.level_key)

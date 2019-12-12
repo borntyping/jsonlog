@@ -8,8 +8,8 @@ import typing
 import click
 import jsonlog
 
-import jsonlog_cli.text
 import jsonlog_cli.pattern
+import jsonlog_cli.text
 
 log = jsonlog.getLogger(__name__)
 
@@ -49,42 +49,20 @@ class Record:
         if key is None:
             return None
 
+        if key in self.json:
+            return self.json[key]
+
+        return self._extract(key)
+
+    def _extract(self, key: str) -> RecordJSONValue:
         result = self.json
+
         for k in key.split("."):
             try:
                 result = result[k]
             except KeyError:
                 return None
         return result
-
-    # def color(self, message: str, level_key: typing.Optional[str]) -> str:
-    #     """Extract a level and use it to color the record if possible."""
-    #     level_value = self.extract(level_key)
-    #
-    #     if not isinstance(level_value, str):
-    #         return message
-    #
-    #     return jsonlog_cli.colors.color(level_value, message)
-
-    def blocks(self, multiline_keys: typing.Sequence[str]) -> typing.Iterator[str]:
-        for key in multiline_keys:
-            value = self.extract(key)
-            if value:
-                string = self.value_to_string(value)
-                yield jsonlog_cli.text.format_multiline(string, dim=True)
-
-    @staticmethod
-    def value_to_string(value: RecordJSONValue) -> str:
-        """
-        Transform a JSON value into something we can display in a multiline block.
-
-        Strings are left alone (as we don't want to add quotes) and any other values are
-        dumped as indented JSON.
-        """
-        if isinstance(value, str):
-            return value
-
-        return json.dumps(value, indent=2)
 
 
 @dataclasses.dataclass()
@@ -114,13 +92,13 @@ class RecordState:
             self.error = True
             click.echo()
 
-    def echo(self, line: str, formatter: jsonlog_cli.pattern.Pattern, color=None):
+    def echo(self, line: str, pattern: jsonlog_cli.pattern.Pattern, color=None):
         try:
             record = Record.from_string(line)
         except json.JSONDecodeError:
             self.toggle_error_state()
-            output = jsonlog_cli.text.format_multiline(line, fg="red", dim=True)
+            output = jsonlog_cli.text.wrap_and_style_lines(line, fg="red", dim=True)
         else:
             self.toggle_normal_state()
-            output = formatter.format_message(record)
+            output = pattern.format_record(record)
         click.echo(output, color=color)
