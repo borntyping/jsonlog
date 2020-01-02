@@ -44,6 +44,12 @@ DEFAULT_CONFIG = {
             }
         ),
     ),
+    "snyk": KeyValuePattern(
+        keys=("time", "msg", "reason.response.body.message"),
+        level_key="level",
+        multiline_keys=("__json__",),
+        colours=ColourMap({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
+    ),
 }
 CONFIG_SCHEMA = {
     "type": "object",

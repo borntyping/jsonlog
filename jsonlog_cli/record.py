@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import json
 import textwrap
@@ -27,8 +28,8 @@ class Record:
     json: RecordDict
 
     def __post_init__(self) -> None:
+        self.json["__json__"] = dict(self.json)
         self.json["__message__"] = self.message
-        self.json["__json__"] = self.json
 
     @classmethod
     def from_string(cls, message: str):
