@@ -9,19 +9,15 @@ import typing
 import jsonschema
 import xdg
 
-import jsonlog_cli.pattern
-import jsonlog_cli.record
+from .pattern import Pattern, TemplatePattern, KeyValuePattern
+from .colours import ColourMap, Colour
 
 log = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
 DEFAULT_CONFIG = {
-    "jsonlog": jsonlog_cli.pattern.KeyValuePattern(
-        keys=("timestamp", "level", "name", "message"), multiline_keys=("traceback",)
-    ),
-    "highlight": jsonlog_cli.pattern.TemplatePattern(template="{__message__}"),
-    "elasticsearch": jsonlog_cli.pattern.KeyValuePattern(
+    "elasticsearch": KeyValuePattern(
         keys=(
             "timestamp",
             "level",
@@ -33,6 +29,20 @@ DEFAULT_CONFIG = {
         ),
         multiline_keys=("stacktrace",),
         multiline_json=True,
+    ),
+    "highlight": TemplatePattern(template="{__message__}"),
+    "jsonlog": KeyValuePattern(
+        keys=("timestamp", "level", "name", "message"),
+        multiline_keys=("traceback",),
+        colours=ColourMap(
+            {
+                "INFO": Colour(fg="cyan"),
+                "WARNING": Colour(fg="yellow"),
+                "WARN": Colour(fg="yellow"),
+                "ERROR": Colour(fg="red"),
+                "CRITICAL": Colour(fg="red"),
+            }
+        ),
     ),
 }
 CONFIG_SCHEMA = {
@@ -60,9 +70,7 @@ CONFIG_SCHEMA = {
 
 @dataclasses.dataclass()
 class Config:
-    patterns: typing.Dict[str, jsonlog_cli.pattern.Pattern] = dataclasses.field(
-        default_factory=dict
-    )
+    patterns: typing.Dict[str, Pattern] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def configure(cls, path: typing.Optional[str]) -> Config:
@@ -81,7 +89,7 @@ class Config:
         instance = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
         for k, v in instance.get("patterns", {}).items():
-            self.patterns[k] = jsonlog_cli.pattern.TemplatePattern(**v)
+            self.patterns[k] = TemplatePattern(**v)
 
 
 def ensure_log_path(path: str) -> typing.Optional[str]:

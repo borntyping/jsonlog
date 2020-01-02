@@ -5,8 +5,7 @@ import itertools
 import json
 import typing
 
-import click
-
+from .colours import Colour, ColourMap
 from .record import Record, RecordJSONValue
 from .text import wrap_and_style_lines
 
@@ -14,27 +13,11 @@ Level = typing.Optional[str]
 
 
 @dataclasses.dataclass()
-class Color:
-    fg: typing.Optional[str] = None
-
-    def style(self, text: str) -> str:
-        return click.style(text, fg=self.fg)
-
-
-COLORS: typing.Mapping[str, Color] = {
-    "INFO".casefold(): Color(fg="cyan"),
-    "WARNING".casefold(): Color(fg="yellow"),
-    "WARN".casefold(): Color(fg="yellow"),
-    "ERROR".casefold(): Color(fg="red"),
-    "CRITICAL".casefold(): Color(fg="red"),
-}
-
-
-@dataclasses.dataclass()
 class Pattern:
     level_key: typing.Optional[str] = "level"
     multiline_keys: typing.Sequence[str] = ()
     multiline_json: bool = False
+    colours: ColourMap = dataclasses.field(default_factory=ColourMap)
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
@@ -73,11 +56,8 @@ class Pattern:
 
         return json.dumps(value, indent=2)
 
-    def highlight_color(self, record: Record) -> Color:
-        level: Level = record.extract(self.level_key)
-        level: Level = level.casefold() if isinstance(level, str) else level
-        color: Color = COLORS.get(level, Color())
-        return color
+    def highlight_color(self, record: Record) -> Colour:
+        return self.colours.get(record.extract(self.level_key))
 
     def replace(self, **changes: typing.Any) -> Pattern:
         changes = {k: v for k, v in changes.items() if v}
@@ -104,13 +84,17 @@ class KeyValuePattern(Pattern):
     keys: typing.Sequence[str] = ("__message__",)
 
     def format_message(self, record: Record) -> str:
-        return " ".join(self.format_pair(record, key) for key in self.keys)
+        colour = self.highlight_color(record)
+        return " ".join(self.format_pair(record, key, colour) for key in self.keys)
 
-    def format_pair(self, record: Record, key: str) -> str:
-        k_color = Color(fg="white")
-        v_color = self.highlight_color(record)
-        k = k_color.style(self.format_key(key))
-        v = v_color.style(self.format_value(record.extract(key)))
+    def format_pair(self, record: Record, key: str, colour: Colour) -> str:
+        k = self.format_key(key)
+        v = self.format_value(record.extract(key))
+
+        if colour:
+            k = Colour(fg="white").style(self.format_key(key))
+            v = colour.style(self.format_value(record.extract(key)))
+
         return f"{k}{v}"
 
     @staticmethod
