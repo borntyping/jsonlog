@@ -11,7 +11,7 @@ from jsonlog_cli.config import (
     ensure_log_path,
 )
 from jsonlog_cli.multiline import BufferedJSONStream
-from jsonlog_cli.record import RecordState
+from jsonlog_cli.errorhandler import ErrorHandler
 
 
 @click.command(name="jsonlog_cli")
@@ -99,7 +99,7 @@ def main(
     if pattern.multiline_json:
         streams = [BufferedJSONStream(stream) for stream in streams]
 
-    with RecordState() as state:
+    with ErrorHandler() as state:
         for stream in streams:
             for line in stream:
                 state.echo(line, pattern, color=True)

@@ -75,7 +75,8 @@ class Pattern:
 
     def highlight_color(self, record: Record) -> Color:
         level: Level = record.extract(self.level_key)
-        color: Color = COLORS.get(level.casefold(), Color())
+        level: Level = level.casefold() if isinstance(level, str) else level
+        color: Color = COLORS.get(level, Color())
         return color
 
     def replace(self, **changes: typing.Any) -> Pattern:
