@@ -86,12 +86,11 @@ class KeyValuePattern(Pattern):
 
     def format_message(self, record: Record) -> str:
         colour = self.highlight_color(record)
-        pairs = (self.format_pair(record, key, colour) for key in self.keys)
-        return " ".join(pairs)
+        pairs = ((k, record.extract(k)) for k in self.keys)
+        pairs = ((k, v) for k, v in pairs if v is not None)
+        return " ".join((self.format_pair(record, k, v, colour) for k, v in pairs))
 
-    def format_pair(self, record: Record, key: str, colour: Colour) -> str:
-        value = record.extract(key)
-
+    def format_pair(self, record: Record, key: str, value: str, colour: Colour) -> str:
         k = self.format_key(key)
         v = self.format_value(value)
 
