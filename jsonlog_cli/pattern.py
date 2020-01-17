@@ -17,7 +17,7 @@ class Pattern:
     level_key: typing.Optional[str] = "level"
     multiline_keys: typing.Sequence[str] = ()
     multiline_json: bool = False
-    colours: ColourMap = dataclasses.field(default_factory=ColourMap)
+    colours: ColourMap = dataclasses.field(default_factory=ColourMap.empty)
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
@@ -57,7 +57,8 @@ class Pattern:
         return json.dumps(value, indent=2)
 
     def highlight_color(self, record: Record) -> Colour:
-        return self.colours.get(record.extract(self.level_key))
+        level = record.extract(self.level_key)
+        return self.colours.get(level)
 
     def replace(self, **changes: typing.Any) -> Pattern:
         changes = {k: v for k, v in changes.items() if v}

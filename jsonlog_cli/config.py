@@ -9,11 +9,21 @@ import typing
 import jsonschema
 import xdg
 
-from .pattern import Pattern, TemplatePattern, KeyValuePattern
-from .colours import ColourMap, Colour
+from .colours import Colour, ColourMap, Alias
+from .pattern import KeyValuePattern, Pattern, TemplatePattern
 
 log = logging.getLogger(__name__)
 
+DEFAULT_COLOURS = ColourMap.from_map(
+    {
+        "info": Colour(fg="cyan"),
+        "warning": Colour(fg="yellow"),
+        "warn": Alias("warning"),
+        "error": Colour(fg="red"),
+        "critical": Colour(fg="red", bold=True),
+        "fatal": Alias("critical"),
+    }
+)
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
 DEFAULT_CONFIG = {
@@ -34,21 +44,19 @@ DEFAULT_CONFIG = {
     "jsonlog": KeyValuePattern(
         keys=("timestamp", "level", "name", "message"),
         multiline_keys=("traceback",),
-        colours=ColourMap(
-            {
-                "INFO": Colour(fg="cyan"),
-                "WARNING": Colour(fg="yellow"),
-                "WARN": Colour(fg="yellow"),
-                "ERROR": Colour(fg="red"),
-                "CRITICAL": Colour(fg="red"),
-            }
-        ),
+        colours=DEFAULT_COLOURS,
     ),
     "snyk": KeyValuePattern(
         keys=("time", "msg", "reason.response.body.message"),
         level_key="level",
         multiline_keys=("__json__",),
-        colours=ColourMap({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
+        colours=ColourMap.from_map({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
+    ),
+    "jaeger": KeyValuePattern(
+        keys=("ts", "msg", "caller", "msg", "route"),
+        level_key="level",
+        multiline_keys=("errorVerbose",),
+        colours=DEFAULT_COLOURS,
     ),
 }
 CONFIG_SCHEMA = {
