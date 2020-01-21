@@ -42,6 +42,9 @@ class Record:
             raise error
         return cls(message=message, json=data)
 
+    def keys(self) -> typing.Iterable[str]:
+        return [k for k in self.json.keys() if k not in {"__json__", "__message__"}]
+
     def extract(self, key: typing.Optional[str]) -> RecordJSONValue:
         if key is None:
             return None

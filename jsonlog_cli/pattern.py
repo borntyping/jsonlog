@@ -17,7 +17,7 @@ class Pattern:
     level_key: typing.Optional[str] = "level"
     multiline_keys: typing.Sequence[str] = ()
     multiline_json: bool = False
-    colours: ColourMap = dataclasses.field(default_factory=ColourMap.empty)
+    colours: ColourMap = dataclasses.field(default=ColourMap.default())
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
@@ -82,21 +82,26 @@ class TemplatePattern(Pattern):
 
 @dataclasses.dataclass()
 class KeyValuePattern(Pattern):
-    keys: typing.Sequence[str] = ("__message__",)
+    # Priority keys are rendered first, and always rendered.
+    priority_keys: typing.Sequence[str] = ()
 
     def format_message(self, record: Record) -> str:
         colour = self.highlight_color(record)
-        pairs = ((k, record.extract(k)) for k in self.keys)
-        pairs = ((k, v) for k, v in pairs if v is not None)
-        return " ".join((self.format_pair(record, k, v, colour) for k, v in pairs))
 
-    def format_pair(self, record: Record, key: str, value: str, colour: Colour) -> str:
-        k = self.format_key(key)
-        v = self.format_value(value)
+        known_keys = {*self.priority_keys, *self.multiline_keys, self.level_key}
+        unknown_keys = (k for k in record.keys() if k not in known_keys)
+        format_keys = list(itertools.chain(self.priority_keys, unknown_keys))
+
+        pairs = ((k, record.extract(k)) for k in format_keys)
+        pairs = ((k, v) for k, v in pairs if v is not None)
+        formatted_pairs = (self.format_pair(k, v, colour) for k, v in pairs)
+        return " ".join(formatted_pairs)
+
+    def format_pair(self, key: str, value: str, colour: Colour) -> str:
+        k, v = self.format_key(key), self.format_value(value)
 
         if colour:
-            k = Colour(fg="white").style(self.format_key(key))
-            v = colour.style(self.format_value(record.extract(key)))
+            k, v = Colour(fg="white").style(k), colour.style(v)
 
         return f"{k}{v}"
 

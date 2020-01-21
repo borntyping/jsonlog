@@ -34,8 +34,21 @@ class ColourMap:
     mapping: typing.Mapping[ColorMapKey, ColorMapValue]
 
     @classmethod
-    def empty(cls):
+    def empty(cls) -> ColourMap:
         return cls({})
+
+    @classmethod
+    def default(cls) -> ColourMap:
+        return cls.from_map(
+            {
+                "info": Colour(fg="cyan"),
+                "warning": Colour(fg="yellow"),
+                "warn": Alias("warning"),
+                "error": Colour(fg="red"),
+                "critical": Colour(fg="red", bold=True),
+                "fatal": Alias("critical"),
+            }
+        )
 
     @classmethod
     def from_map(cls, mapping: typing.Mapping[ColorMapKey, Colour]):
