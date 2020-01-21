@@ -53,9 +53,9 @@ DEFAULT_CONFIG = {
         colours=ColourMap.from_map({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
     ),
     "jaeger": KeyValuePattern(
-        keys=("ts", "msg", "caller", "msg", "route"),
+        keys=("ts", "msg", "caller", "route"),
         level_key="level",
-        multiline_keys=("errorVerbose",),
+        multiline_keys=("error", "errorVerbose"),
         colours=DEFAULT_COLOURS,
     ),
 }
