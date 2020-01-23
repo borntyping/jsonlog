@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
 DEFAULT_CONFIG = {
+    "default": KeyValuePattern(multiline_keys=("traceback", "stacktrace")),
     "elasticsearch": KeyValuePattern(
         priority_keys=(
             "timestamp",
@@ -40,7 +41,7 @@ DEFAULT_CONFIG = {
         multiline_keys=("__json__",),
         colours=ColourMap.from_map({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
     ),
-    "jaeger": KeyValuePattern(multiline_keys=("error", "errorVerbose")),
+    "jaeger": KeyValuePattern(multiline_keys=("errorVerbose", "stacktrace")),
 }
 CONFIG_SCHEMA = {
     "type": "object",

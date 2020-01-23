@@ -41,7 +41,7 @@ from jsonlog_cli.errorhandler import ErrorHandler
     "--pattern",
     "pattern_name",
     type=click.STRING,
-    default="jsonlog",
+    default="default",
     metavar="NAME",
     help="The named pattern to format lines with.",
 )
