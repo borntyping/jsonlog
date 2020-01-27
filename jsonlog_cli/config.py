@@ -58,9 +58,10 @@ CONFIG_SCHEMA = {
             "properties": {
                 "template": {"type": "string"},
                 "level_key": {"type": "string"},
+                "priority_keys": {"type": "array", "items": {"type": "string"}},
                 "multiline_keys": {"type": "array", "items": {"type": "string"}},
+                "multiline_json": {"type": "boolean"},
             },
-            "required": ["template"],
         }
     },
 }
@@ -68,11 +69,18 @@ CONFIG_SCHEMA = {
 
 @dataclasses.dataclass()
 class Config:
-    patterns: typing.Dict[str, Pattern] = dataclasses.field(default_factory=dict)
+    patterns: typing.Dict[str, Pattern]
+    pattern_classes: typing.Dict[str, typing.Type[Pattern]]
 
     @classmethod
     def configure(cls, path: typing.Optional[str]) -> Config:
-        config = Config(DEFAULT_CONFIG)
+        config = Config(
+            patterns=DEFAULT_CONFIG,
+            pattern_classes={
+                "TemplatePattern": TemplatePattern,
+                "KeyValuePattern": KeyValuePattern,
+            },
+        )
 
         if path is not None:
             log.info(f"Reading configuration from file = {path!r}")
@@ -87,7 +95,9 @@ class Config:
         instance = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
         for k, v in instance.get("patterns", {}).items():
-            self.patterns[k] = TemplatePattern(**v)
+            cls_name = v.pop("class", "key_value")
+            cls = self.pattern_classes[cls_name]
+            self.patterns[k] = cls(**v)
 
 
 def ensure_log_path(path: str) -> typing.Optional[str]:
