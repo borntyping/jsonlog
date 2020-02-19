@@ -6,10 +6,11 @@ import json
 import typing
 
 from .colours import Colour, ColourMap
-from .record import Record, RecordJSONValue
+from .record import Record, RecordKey, RecordValue
 from .text import wrap_and_style_lines
 
 Level = typing.Optional[str]
+Pair = typing.Tuple[RecordKey, RecordValue]
 
 
 @dataclasses.dataclass()
@@ -41,7 +42,7 @@ class Pattern:
                 yield wrap_and_style_lines(string, dim=True)
 
     @staticmethod
-    def format_multiline_value(value: RecordJSONValue) -> str:
+    def format_multiline_value(value: RecordValue) -> str:
         """
         Transform a JSON value into something we can display in a multiline block.
 
@@ -92,8 +93,7 @@ class KeyValuePattern(Pattern):
         unknown_keys = (k for k in record.keys() if k not in known_keys)
         format_keys = list(itertools.chain(self.priority_keys, unknown_keys))
 
-        pairs = ((k, record.extract(k)) for k in format_keys)
-        pairs = ((k, v) for k, v in pairs if v is not None)
+        pairs = self._record_pairs(record, format_keys)
         formatted_pairs = (self.format_pair(k, v, colour) for k, v in pairs)
         return " ".join(formatted_pairs)
 
@@ -104,6 +104,32 @@ class KeyValuePattern(Pattern):
             k, v = Colour(fg="white").style(k), colour.style(v)
 
         return f"{k}{v}"
+
+    def _record_pairs(
+        self, record: Record, keys: typing.Sequence[RecordKey]
+    ) -> typing.Iterable[Pair]:
+        """
+        Iterate over key=value pairs for specific keys in a record.
+
+        A single key might return multiple pairs if it's value is a mapping.
+        """
+        for key in keys:
+            value = record.extract(key)
+            if isinstance(value, dict):
+                yield from self._nested_pairs(parent=key, data=value)
+            elif value is not None:
+                yield key, value
+
+    def _nested_pairs(
+        self, parent: str, data: typing.Mapping[RecordKey, RecordValue]
+    ) -> typing.Iterable[Pair]:
+        """Iterate over pairs in a mapping, prefixing each key with a "parent" key."""
+        for key, value in data.items():
+            nested_key = ".".join((parent, key))
+            if isinstance(value, dict):
+                yield from self._nested_pairs(nested_key, value)
+            elif value is not None:
+                yield nested_key, value
 
     @staticmethod
     def format_key(key: str) -> str:

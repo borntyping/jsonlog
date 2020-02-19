@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import dataclasses
 import json
 import textwrap
@@ -10,12 +9,11 @@ import jsonlog
 
 log = jsonlog.getLogger(__name__)
 
-RecordJSONValue = typing.Union[
-    None, str, int, float, bool, typing.Sequence, typing.Mapping
-]
+RecordKey = str
+RecordValue = typing.Union[None, str, int, float, bool, typing.Sequence, typing.Mapping]
 
 
-class RecordDict(dict, typing.Mapping[str, RecordJSONValue]):
+class RecordDict(dict, typing.Mapping[str, RecordValue]):
     """A mapping that allows access to values as if they were attributes."""
 
     def __getattr__(self, item) -> typing.Any:
@@ -45,7 +43,7 @@ class Record:
     def keys(self) -> typing.Iterable[str]:
         return [k for k in self.json.keys() if k not in {"__json__", "__message__"}]
 
-    def extract(self, key: typing.Optional[str]) -> RecordJSONValue:
+    def extract(self, key: typing.Optional[str]) -> RecordValue:
         if key is None:
             return None
 
@@ -54,7 +52,7 @@ class Record:
 
         return self._extract(key)
 
-    def _extract(self, key: str) -> RecordJSONValue:
+    def _extract(self, key: str) -> RecordValue:
         result = self.json
 
         for k in key.split("."):

@@ -5,7 +5,7 @@ import typing
 
 import click
 
-from jsonlog_cli.record import RecordJSONValue
+from jsonlog_cli.record import RecordValue
 
 
 @dataclasses.dataclass()
@@ -25,7 +25,7 @@ class Colour:
         return click.style(text, fg=self.fg, bold=self.bold) if self else text
 
 
-ColorMapKey = RecordJSONValue
+ColorMapKey = RecordValue
 ColorMapValue = typing.Union[Alias, Colour]
 
 
