@@ -68,7 +68,9 @@ class Pattern:
         return json.dumps(value, indent=2)
 
     def highlight_color(self, record: Record) -> Colour:
-        return self.colours.get(record.extract(self.level_key.name))
+        level = record.extract(self.level_key.name)
+        print(level, self.colours.get(level))
+        return self.colours.get(level)
 
     def replace(self, **changes: typing.Any) -> Pattern:
         return dataclasses.replace(self, **changes)
@@ -93,9 +95,6 @@ class KeyValuePattern(Pattern):
         known_keys = {*self.priority_keys, *self.multiline_keys, self.level_key}
         unknown_keys = (Key(k) for k in record.keys() if k not in known_keys)
         format_keys = list(itertools.chain(self.priority_keys, unknown_keys))
-
-        print(known_keys)
-        print(format_keys)
 
         pairs = self._record_pairs(record, format_keys)
         formatted_pairs = (k.format_pair(v, colour) for k, v in pairs)

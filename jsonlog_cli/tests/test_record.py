@@ -21,27 +21,27 @@ class Example:
     "example",
     [
         Example(
-            line='{"timestamp": "2019-06-26", "message": "Hello World"}',
-            expected="2019-06-26 Hello World",
+            line='{"timestamp": "2019-06-26", "message": "Hello World 1"}',
+            expected="2019-06-26 Hello World 1",
             pattern=TemplatePattern(template="{timestamp} {message}"),
         ),
         Example(
-            line='{"@timestamp": "2019-06-26", "@message": "Hello World"}',
-            expected="2019-06-26 Hello World",
+            line='{"@timestamp": "2019-06-26", "@message": "Hello World 2"}',
+            expected="2019-06-26 Hello World 2",
             pattern=TemplatePattern(template="{@timestamp} {@message}"),
         ),
         # Test message coloring.
         Example(
-            line='{"message": "Hello World", "level": "CRITICAL"}',
-            expected="CRITICAL Hello World",
+            line='{"message": "Hello World 3", "level": "CRITICAL"}',
+            expected="\x1b[31m\x1b[1mCRITICAL Hello World 3\x1b[0m",
             pattern=TemplatePattern(
                 template="{level} {message}", level_key=Key("level")
             ),
         ),
         # Test nested keys can be used in both the format string and config keys.
         Example(
-            line='{"nested": {"message": "Hello World", "multiline": "Lorem Ipsum", "level": "CRITICAL"}}',
-            expected="Hello World\n\n    \x1b[2mLorem Ipsum\x1b[0m\n",
+            line='{"nested": {"message": "Hello World 4", "multiline": "Lorem Ipsum", "level": "CRITICAL"}}',
+            expected="\x1b[31m\x1b[1mHello World 4\x1b[0m\n\n    \x1b[2mLorem Ipsum\x1b[0m\n",
             pattern=TemplatePattern(
                 template="{nested.message}",
                 level_key=Key("nested.level"),

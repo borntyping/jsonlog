@@ -40,7 +40,7 @@ DEFAULT_CONFIG = {
     "snyk": KeyValuePattern(
         priority_keys=(Key("time"), Key("msg"), Key("reason.response.body.message")),
         multiline_keys=(Key("__json__"),),
-        colours=ColourMap.from_map({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
+        colours=ColourMap({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
     ),
     "jaeger": KeyValuePattern(multiline_keys=(Key("errorVerbose"), Key("stacktrace"))),
 }

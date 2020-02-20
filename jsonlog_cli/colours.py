@@ -18,9 +18,6 @@ class Alias(typing.Generic[K]):
 
 
 class AliasedDict(collections.UserDict, typing.Mapping[K, V]):
-    def __init__(self, mapping: typing.Mapping[K, typing.Union[Alias, V]]) -> None:
-        super().__init__(mapping)
-
     def __getitem__(self, item: K) -> V:
         value = super().__getitem__(item)
 
@@ -58,7 +55,7 @@ class ColourMap:
     mapping: typing.Mapping[RecordValue, Colour]
 
     def __init__(self, mapping: ColorMapDefinition) -> None:
-        self.mapping = AliasedDict(mapping)
+        self.mapping = AliasedDict({self.normalise(k): v for k, v in mapping.items()})
 
     @classmethod
     def empty(cls) -> ColourMap:
@@ -66,7 +63,7 @@ class ColourMap:
 
     @classmethod
     def default(cls) -> ColourMap:
-        return cls.from_map(
+        return cls(
             {
                 "info": Colour(fg="cyan"),
                 "warning": Colour(fg="yellow"),
@@ -76,10 +73,6 @@ class ColourMap:
                 "fatal": Alias("critical"),
             }
         )
-
-    @classmethod
-    def from_map(cls, mapping: ColorMapDefinition):
-        return cls({cls.normalise(k): v for k, v in mapping.items()})
 
     def get(self, item: RecordValue) -> Colour:
         return self.mapping.get(self.normalise(item), Colour())
