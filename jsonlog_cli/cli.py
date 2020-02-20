@@ -10,9 +10,8 @@ from jsonlog_cli.config import (
     DEFAULT_LOG_PATH,
     ensure_log_path,
 )
-from jsonlog_cli.multiline import BufferedJSONStream
-from jsonlog_cli.errorhandler import ErrorHandler
-from jsonlog_cli.pattern import KeyValuePattern, TemplatePattern
+from jsonlog_cli.pattern import KeyValuePattern, TemplatePattern, Pattern
+from jsonlog_cli.key import Key
 
 
 @click.command(name="jsonlog_cli")
@@ -57,7 +56,7 @@ from jsonlog_cli.pattern import KeyValuePattern, TemplatePattern
 @click.option(
     "-k",
     "--key",
-    "priority_keys",
+    "_priority_keys",
     type=click.STRING,
     multiple=True,
     metavar="KEY",
@@ -74,7 +73,7 @@ from jsonlog_cli.pattern import KeyValuePattern, TemplatePattern
 @click.option(
     "-m",
     "--multiline-key",
-    "multiline_keys",
+    "_multiline_keys",
     type=click.STRING,
     multiple=True,
     metavar="KEY",
@@ -92,20 +91,30 @@ def main(
     config_path: str,
     log_path: str,
     pattern_name: str,
-    priority_keys: typing.Sequence[str],
     level_key: typing.Optional[str],
     template: typing.Optional[str],
-    multiline_keys: typing.Optional[typing.Sequence[str]],
     reset_multiline_keys: bool,
+    _priority_keys: typing.Sequence[str],
+    _multiline_keys: typing.Sequence[str],
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
     jsonlog.basicConfig(filename=ensure_log_path(log_path))
 
+    multiline_keys: typing.Sequence[Key] = [Key.from_string(k) for k in _multiline_keys]
+    priority_keys: typing.Sequence[Key] = [Key.from_string(k) for k in _priority_keys]
+
     streams = streams or (sys.stdin,)
-    config = Config.configure(config_path)
-    pattern = config.patterns[pattern_name]
-    pattern = pattern.replace(level_key=level_key)
-    pattern = pattern.add_multiline_keys(multiline_keys, reset_multiline_keys)
+    config: Config = Config.configure(config_path)
+    pattern: Pattern = config.patterns[pattern_name]
+
+    if level_key:
+        pattern = pattern.replace(level_key=Key.from_string(level_key))
+
+    if reset_multiline_keys:
+        pattern = pattern.replace(multiline_keys=[])
+
+    if multiline_keys:
+        pattern = pattern.replace(multiline_keys=multiline_keys)
 
     if priority_keys:
         assert isinstance(pattern, KeyValuePattern)

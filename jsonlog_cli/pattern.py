@@ -6,6 +6,7 @@ import json
 import typing
 
 from .colours import Colour, ColourMap
+from .key import Key
 from .record import Record, RecordKey, RecordValue
 from .text import wrap_and_style_lines
 from .errorhandler import ErrorHandler
@@ -15,38 +16,13 @@ Level = typing.Optional[str]
 
 
 @dataclasses.dataclass()
-class Key:
-    name: RecordKey
-    template: typing.Optional[str] = None
-
-    def format_key(self) -> str:
-        return f"{self.name}="
-
-    def format_value(self, value: RecordValue) -> str:
-        if self.template is not None:
-            return self.template.format(value)
-
-        return repr(value)
-
-    def format_pair(self, value: str, colour: Colour) -> str:
-        k = self.format_key()
-        v = self.format_value(value)
-
-        if colour:
-            k = Colour(fg="white").style(k)
-            v = colour.style(v)
-
-        return f"{k}{v}"
-
-
-@dataclasses.dataclass()
 class Pattern:
-    level_key: typing.Optional[str] = "level"
-    multiline_keys: typing.Sequence[str] = ()
+    level_key: Key = Key("level")
+    multiline_keys: typing.Sequence[Key] = ()
     multiline_json: bool = False
     colours: ColourMap = dataclasses.field(default=ColourMap.default())
 
-    def stream(self, stream: typing.TextIO) -> None:
+    def stream(self, stream: typing.Iterable[str]) -> None:
         if self.multiline_json:
             stream = BufferedJSONStream(stream)
 
@@ -70,7 +46,7 @@ class Pattern:
 
     def format_multiline(self, record: Record) -> typing.Iterator[str]:
         for key in self.multiline_keys:
-            value = record.extract(key)
+            value = record.extract(key.name)
             if value:
                 string = self.format_multiline_value(value)
                 yield wrap_and_style_lines(string, dim=True)
@@ -92,19 +68,10 @@ class Pattern:
         return json.dumps(value, indent=2)
 
     def highlight_color(self, record: Record) -> Colour:
-        level = record.extract(self.level_key)
-        return self.colours.get(level)
+        return self.colours.get(record.extract(self.level_key.name))
 
     def replace(self, **changes: typing.Any) -> Pattern:
-        changes = {k: v for k, v in changes.items() if v}
         return dataclasses.replace(self, **changes)
-
-    def add_multiline_keys(
-        self, multiline_keys: typing.Sequence[str], reset_multiline_keys: bool = False
-    ) -> Pattern:
-        if not reset_multiline_keys:
-            multiline_keys = list(itertools.chain(self.multiline_keys, multiline_keys))
-        return dataclasses.replace(self, multiline_keys=multiline_keys)
 
 
 @dataclasses.dataclass()
@@ -126,6 +93,9 @@ class KeyValuePattern(Pattern):
         known_keys = {*self.priority_keys, *self.multiline_keys, self.level_key}
         unknown_keys = (Key(k) for k in record.keys() if k not in known_keys)
         format_keys = list(itertools.chain(self.priority_keys, unknown_keys))
+
+        print(known_keys)
+        print(format_keys)
 
         pairs = self._record_pairs(record, format_keys)
         formatted_pairs = (k.format_pair(v, colour) for k, v in pairs)
@@ -155,7 +125,7 @@ class KeyValuePattern(Pattern):
             if isinstance(v, dict):
                 yield from self._nested_pairs(nested_key, v)
             elif v is not None:
-                yield nested_key, v
+                yield Key(nested_key), v
 
     @staticmethod
     def format_key(key: str) -> str:

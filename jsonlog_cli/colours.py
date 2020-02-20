@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import dataclasses
 import typing
 
@@ -7,10 +8,34 @@ import click
 
 from jsonlog_cli.record import RecordValue
 
+K = typing.TypeVar("K")
+V = typing.TypeVar("V")
+
 
 @dataclasses.dataclass()
-class Alias:
-    name: str
+class Alias(typing.Generic[K]):
+    name: K
+
+
+class AliasedDict(collections.UserDict, typing.Mapping[K, V]):
+    def __init__(self, mapping: typing.Mapping[K, typing.Union[Alias, V]]) -> None:
+        super().__init__(mapping)
+
+    def __getitem__(self, item: K) -> V:
+        value = super().__getitem__(item)
+
+        if isinstance(value, Alias):
+            return self._get_alias(item, value)
+
+        return value
+
+    def _get_alias(self, original: K, alias: Alias[K]) -> V:
+        value = self.__getitem__(alias.name)
+
+        if isinstance(value, Alias):
+            raise Exception(f"Aliased key {original!r} points to alias {value!r}")
+
+        return value
 
 
 @dataclasses.dataclass()
@@ -25,13 +50,15 @@ class Colour:
         return click.style(text, fg=self.fg, bold=self.bold) if self else text
 
 
-ColorMapKey = RecordValue
-ColorMapValue = typing.Union[Alias, Colour]
+ColorMapDefinition = typing.Mapping[RecordValue, typing.Union[Alias, Colour]]
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass()
 class ColourMap:
-    mapping: typing.Mapping[ColorMapKey, ColorMapValue]
+    mapping: typing.Mapping[RecordValue, Colour]
+
+    def __init__(self, mapping: ColorMapDefinition) -> None:
+        self.mapping = AliasedDict(mapping)
 
     @classmethod
     def empty(cls) -> ColourMap:
@@ -51,31 +78,12 @@ class ColourMap:
         )
 
     @classmethod
-    def from_map(cls, mapping: typing.Mapping[ColorMapKey, Colour]):
+    def from_map(cls, mapping: ColorMapDefinition):
         return cls({cls.normalise(k): v for k, v in mapping.items()})
 
-    def _get_item(self, item: ColorMapKey) -> ColorMapValue:
+    def get(self, item: RecordValue) -> Colour:
         return self.mapping.get(self.normalise(item), Colour())
 
-    def _get_alias(self, alias: ColorMapKey, item: ColorMapKey) -> ColorMapValue:
-        key = self.normalise(item)
-        value = self.mapping.get(key, Colour())
-
-        if isinstance(value, Alias):
-            raise Exception(
-                f"Key {alias!r} points to alias {item!r} with value {value!r}"
-            )
-
-        return value
-
-    def get(self, item: ColorMapKey) -> Colour:
-        value = self._get_item(item)
-
-        if isinstance(value, Alias):
-            return self._get_alias(item, value.name)
-
-        return value
-
     @staticmethod
-    def normalise(value: ColorMapKey) -> ColorMapKey:
+    def normalise(value: RecordValue) -> RecordValue:
         return value.casefold() if isinstance(value, str) else value

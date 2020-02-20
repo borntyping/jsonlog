@@ -8,7 +8,7 @@ import typing
 class BufferedJSONStream:
     """Collect lines until the buffer can be parsed as a JSON document."""
 
-    stream: typing.TextIO
+    stream: typing.Iterable[str]
     buffer: str = ""
 
     def __iter__(self):

@@ -9,39 +9,40 @@ import typing
 import jsonschema
 import xdg
 
-from .colours import Colour, ColourMap, Alias
+from .colours import Colour, ColourMap
 from .pattern import KeyValuePattern, Pattern, TemplatePattern
+from .key import Key
 
 log = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
 DEFAULT_CONFIG = {
-    "default": KeyValuePattern(multiline_keys=("traceback", "stacktrace")),
+    "default": KeyValuePattern(multiline_keys=(Key("traceback"), Key("stacktrace"))),
     "elasticsearch": KeyValuePattern(
         priority_keys=(
-            "timestamp",
-            "level",
-            "type",
-            "component",
-            "cluster.name",
-            "node.name",
-            "message",
+            Key("timestamp"),
+            Key("level"),
+            Key("type"),
+            Key("component"),
+            Key("cluster.name"),
+            Key("node.name"),
+            Key("message"),
         ),
-        multiline_keys=("stacktrace",),
+        multiline_keys=(Key("stacktrace"),),
         multiline_json=True,
     ),
     "highlight": TemplatePattern(template="{__message__}"),
     "jsonlog": KeyValuePattern(
-        priority_keys=("timestamp", "level", "name", "message"),
-        multiline_keys=("traceback",),
+        priority_keys=(Key("timestamp"), Key("level"), Key("name"), Key("message")),
+        multiline_keys=(Key("traceback"),),
     ),
     "snyk": KeyValuePattern(
-        priority_keys=("time", "msg", "reason.response.body.message"),
-        multiline_keys=("__json__",),
+        priority_keys=(Key("time"), Key("msg"), Key("reason.response.body.message")),
+        multiline_keys=(Key("__json__"),),
         colours=ColourMap.from_map({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
     ),
-    "jaeger": KeyValuePattern(multiline_keys=("errorVerbose", "stacktrace")),
+    "jaeger": KeyValuePattern(multiline_keys=(Key("errorVerbose"), Key("stacktrace"))),
 }
 CONFIG_SCHEMA = {
     "type": "object",
