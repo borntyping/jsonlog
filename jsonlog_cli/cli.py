@@ -12,6 +12,7 @@ from jsonlog_cli.config import (
 )
 from jsonlog_cli.multiline import BufferedJSONStream
 from jsonlog_cli.errorhandler import ErrorHandler
+from jsonlog_cli.pattern import KeyValuePattern, TemplatePattern
 
 
 @click.command(name="jsonlog_cli")
@@ -54,12 +55,21 @@ from jsonlog_cli.errorhandler import ErrorHandler
     help="Override the key for each record's log level.",
 )
 @click.option(
+    "-k",
+    "--key",
+    "priority_keys",
+    type=click.STRING,
+    multiple=True,
+    metavar="KEY",
+    help="Set keys to output first.",
+)
+@click.option(
     "-t",
     "--template",
     "template",
     type=click.STRING,
     metavar="TEMPLATE",
-    help="Override the template used to output each record.",
+    help="Set a template to format records with. Overrides --key.",
 )
 @click.option(
     "-m",
@@ -82,6 +92,7 @@ def main(
     config_path: str,
     log_path: str,
     pattern_name: str,
+    priority_keys: typing.Sequence[str],
     level_key: typing.Optional[str],
     template: typing.Optional[str],
     multiline_keys: typing.Optional[typing.Sequence[str]],
@@ -93,13 +104,16 @@ def main(
     streams = streams or (sys.stdin,)
     config = Config.configure(config_path)
     pattern = config.patterns[pattern_name]
-    pattern = pattern.replace(template=template, level_key=level_key)
+    pattern = pattern.replace(level_key=level_key)
     pattern = pattern.add_multiline_keys(multiline_keys, reset_multiline_keys)
 
-    if pattern.multiline_json:
-        streams = [BufferedJSONStream(stream) for stream in streams]
+    if priority_keys:
+        assert isinstance(pattern, KeyValuePattern)
+        pattern = pattern.replace(priority_keys=priority_keys)
 
-    with ErrorHandler() as state:
-        for stream in streams:
-            for line in stream:
-                state.echo(line, pattern, color=True)
+    if template:
+        assert isinstance(pattern, TemplatePattern)
+        pattern = pattern.replace(template=template)
+
+    for stream in streams:
+        pattern.stream(stream)
