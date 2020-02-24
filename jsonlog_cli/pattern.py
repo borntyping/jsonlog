@@ -69,7 +69,6 @@ class Pattern:
 
     def highlight_color(self, record: Record) -> Colour:
         level = record.extract(self.level_key.name)
-        print(level, self.colours.get(level))
         return self.colours.get(level)
 
     def replace(self, **changes: typing.Any) -> Pattern:
