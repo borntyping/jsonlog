@@ -92,7 +92,7 @@ class KeyValuePattern(Pattern):
         colour = self.highlight_color(record)
 
         known_keys = {*self.priority_keys, *self.multiline_keys, self.level_key}
-        unknown_keys = (Key(k) for k in record.keys() if k not in known_keys)
+        unknown_keys = {Key(k) for k in record.keys() if Key(k) not in known_keys}
         format_keys = list(itertools.chain(self.priority_keys, unknown_keys))
 
         pairs = self._record_pairs(record, format_keys)
