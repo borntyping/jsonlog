@@ -43,6 +43,10 @@ DEFAULT_CONFIG = {
         colours=ColourMap({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
     ),
     "jaeger": KeyValuePattern(multiline_keys=(Key("errorVerbose"), Key("stacktrace"))),
+    "vault": KeyValuePattern(
+        level_key=Key("@level"),
+        priority_keys=(Key("@timestamp"), Key("@module"), Key("@message")),
+    ),
 }
 CONFIG_SCHEMA = {
     "type": "object",
