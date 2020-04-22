@@ -63,6 +63,15 @@ from jsonlog_cli.key import Key
     help="Set keys to output first.",
 )
 @click.option(
+    "-r",
+    "--remove-key",
+    "_remove_keys",
+    type=click.STRING,
+    multiple=True,
+    metavar="KEY",
+    help="Remove keys from the pattern.",
+)
+@click.option(
     "-t",
     "--template",
     "template",
@@ -94,14 +103,16 @@ def main(
     level_key: typing.Optional[str],
     template: typing.Optional[str],
     reset_multiline_keys: bool,
-    _priority_keys: typing.Sequence[str],
+    _remove_keys: typing.Sequence[str],
     _multiline_keys: typing.Sequence[str],
+    _priority_keys: typing.Sequence[str],
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
     jsonlog.basicConfig(filename=ensure_log_path(log_path))
 
-    multiline_keys: typing.Sequence[Key] = [Key.from_string(k) for k in _multiline_keys]
-    priority_keys: typing.Sequence[Key] = [Key.from_string(k) for k in _priority_keys]
+    remove_keys = Key.from_strings(_remove_keys)
+    multiline_keys = Key.from_strings(_multiline_keys)
+    priority_keys = Key.from_strings(_priority_keys)
 
     streams = streams or (sys.stdin,)
     config: Config = Config.configure(config_path)
@@ -119,6 +130,10 @@ def main(
     if priority_keys:
         assert isinstance(pattern, KeyValuePattern)
         pattern = pattern.replace(priority_keys=priority_keys)
+
+    if remove_keys:
+        assert isinstance(pattern, KeyValuePattern)
+        pattern = pattern.remove_keys(remove_keys)
 
     if template:
         assert isinstance(pattern, TemplatePattern)

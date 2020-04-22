@@ -88,19 +88,29 @@ class KeyValuePattern(Pattern):
     # Priority keys are rendered first, and always rendered.
     priority_keys: typing.Sequence[Key] = ()
 
+    # Removed keys have been removed from 'priority_keys' and 'multiline_keys',
+    # but also need to be removed from the unknown keys in each line.
+    removed_keys: typing.Sequence[Key] = ()
+
     def format_message(self, record: Record) -> str:
         colour = self.highlight_color(record)
 
-        known_keys = {*self.priority_keys, *self.multiline_keys, self.level_key}
+        known_keys = {
+            *self.priority_keys,
+            *self.multiline_keys,
+            *self.removed_keys,
+            self.level_key,
+        }
+
         unknown_keys = {Key(k) for k in record.keys() if Key(k) not in known_keys}
-        format_keys = list(itertools.chain(self.priority_keys, unknown_keys))
+        format_keys = itertools.chain(self.priority_keys, unknown_keys)
 
         pairs = self._record_pairs(record, format_keys)
         formatted_pairs = (k.format_pair(v, colour) for k, v in pairs)
         return " ".join(formatted_pairs)
 
     def _record_pairs(
-        self, record: Record, keys: typing.Sequence[Key]
+        self, record: Record, keys: typing.Iterable[Key]
     ) -> typing.Iterable[typing.Tuple[Key, RecordValue]]:
         """
         Iterate over key=value pairs for specific keys in a record.
@@ -132,3 +142,10 @@ class KeyValuePattern(Pattern):
     @staticmethod
     def format_value(value: str) -> str:
         return repr(value)
+
+    def remove_keys(self, keys: typing.Container[Key]) -> KeyValuePattern:
+        return self.replace(
+            removed_keys=keys,
+            multiline_keys=[k for k in self.multiline_keys if k not in keys],
+            priority_keys=[k for k in self.priority_keys if k not in keys],
+        )
