@@ -82,7 +82,8 @@ from jsonlog_cli.key import Key
 @click.option(
     "-m",
     "--multiline-key",
-    "_multiline_keys",
+    "--add-multiline-key",
+    "_multiline_keys_add",
     type=click.STRING,
     multiple=True,
     metavar="KEY",
@@ -90,10 +91,12 @@ from jsonlog_cli.key import Key
 )
 @click.option(
     "-M",
-    "--reset-multiline-keys",
-    "reset_multiline_keys",
-    is_flag=True,
-    help="Remove existing multiline keys from the pattern.",
+    "--replace-multiline-key",
+    "_multiline_keys_replace",
+    type=click.STRING,
+    multiple=True,
+    metavar="KEY",
+    help="Replace the patterns existing multiline keys.",
 )
 def main(
     streams: typing.Iterable[typing.TextIO],
@@ -102,16 +105,17 @@ def main(
     pattern_name: str,
     level_key: typing.Optional[str],
     template: typing.Optional[str],
-    reset_multiline_keys: bool,
-    _remove_keys: typing.Sequence[str],
-    _multiline_keys: typing.Sequence[str],
+    _multiline_keys_add: typing.Sequence[str],
+    _multiline_keys_replace: typing.Sequence[str],
     _priority_keys: typing.Sequence[str],
+    _remove_keys: typing.Sequence[str],
 ) -> None:
     """Format line-delimited JSON log records in a human-readable way."""
     jsonlog.basicConfig(filename=ensure_log_path(log_path))
 
     remove_keys = Key.from_strings(_remove_keys)
-    multiline_keys = Key.from_strings(_multiline_keys)
+    multiline_keys_add = Key.from_strings(_multiline_keys_add)
+    multiline_keys_replace = Key.from_strings(_multiline_keys_replace)
     priority_keys = Key.from_strings(_priority_keys)
 
     streams = streams or (sys.stdin,)
@@ -121,10 +125,11 @@ def main(
     if level_key:
         pattern = pattern.replace(level_key=Key.from_string(level_key))
 
-    if reset_multiline_keys:
-        pattern = pattern.replace(multiline_keys=[])
+    if multiline_keys_replace:
+        pattern = pattern.replace(multiline_keys=multiline_keys_replace)
 
-    if multiline_keys:
+    if multiline_keys_add:
+        multiline_keys = (*pattern.multiline_keys, *multiline_keys_add)
         pattern = pattern.replace(multiline_keys=multiline_keys)
 
     if priority_keys:
