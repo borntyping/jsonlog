@@ -77,8 +77,14 @@ class BaseJSONFormatter:
         # added using the `extra` argument. Attributes from `extra` are placed into a
         # LogRecords's `__dict__` by the `Logger.makeRecord` method, which makes it
         # difficult to discover and use them in a log message.
-        attrs_keys = self.RECORD_KEYS - self.SPECIAL_KEYS
-        extra_keys = set(record.__dict__.keys()) - self.RECORD_KEYS - self.SPECIAL_KEYS
+        #
+        # The 'extra_keys' var is a sequence, not a set, so that ordering is preserved.
+        attrs_keys: typing.Set[str] = self.RECORD_KEYS - self.SPECIAL_KEYS
+        extra_keys: typing.Sequence[str] = [
+            key
+            for key in record.__dict__.keys()
+            if key not in self.RECORD_KEYS and key not in self.SPECIAL_KEYS
+        ]
         attrs: JSON = {k: getattr(record, k) for k in attrs_keys}
         extra: JSON = {k: getattr(record, k) for k in extra_keys}
 
