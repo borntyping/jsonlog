@@ -13,6 +13,7 @@ from .errorhandler import ErrorHandler
 from .multiline import BufferedJSONStream
 
 Level = typing.Optional[str]
+T = typing.TypeVar("T")
 
 
 @dataclasses.dataclass()
@@ -71,7 +72,7 @@ class Pattern:
         level = record.extract(self.level_key.name)
         return self.colours.get(level)
 
-    def replace(self, **changes: typing.Any) -> Pattern:
+    def replace(self: T, **changes: typing.Any) -> T:
         return dataclasses.replace(self, **changes)
 
 
@@ -102,7 +103,8 @@ class KeyValuePattern(Pattern):
             self.level_key,
         }
 
-        unknown_keys = {Key(k) for k in record.keys() if Key(k) not in known_keys}
+        unknown_keys: typing.Sequence[Key]  # Retain the record's existing order.
+        unknown_keys = [Key(k) for k in record.keys() if Key(k) not in known_keys]
         format_keys = itertools.chain(self.priority_keys, unknown_keys)
 
         pairs = self._record_pairs(record, format_keys)
