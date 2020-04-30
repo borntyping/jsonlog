@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "jsonlog"
+version = "3.0.0"
+authors = ["Sam Clements <sam@borntyping.co.uk>"]
+description = "JSON formatter for the builtin logging module"
+homepage = "https://github.com/borntyping/jsonlog/tree/master/jsonlog"
+repository = "https://github.com/borntyping/jsonlog"
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+flake8 = "*"
+mypy = "*"
+pytest = "*"
+
+[flake8]
+max-line-length = 90
