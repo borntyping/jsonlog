@@ -1,0 +1,10 @@
+2020/01/21 10:27:55 maxprocs: Updating GOMAXPROCS=1: using minimum allowed GOMAXPROCS
+{"level":"info","ts":1579602475.247166,"caller":"flags/service.go:115","msg":"Mounting metrics handler on admin server","route":"/metrics"}
+{"level":"info","ts":1579602475.2473795,"caller":"flags/admin.go:108","msg":"Mounting health check on admin server","route":"/"}
+{"level":"info","ts":1579602475.2474675,"caller":"flags/admin.go:114","msg":"Starting admin HTTP server","http-port":16687}
+{"level":"info","ts":1579602475.2474847,"caller":"flags/admin.go:100","msg":"Admin server started","http-port":16687,"health-status":"unavailable"}
+{"level":"info","ts":1579602475.3057249,"caller":"config/config.go:172","msg":"Elasticsearch detected","version":7}
+{"level":"info","ts":1579602475.3076506,"caller":"healthcheck/handler.go:128","msg":"Health Check state change","status":"ready"}
+{"level":"info","ts":1579602475.3077722,"caller":"app/server.go:135","msg":"Starting CMUX server","port":16686}
+{"level":"info","ts":1579602475.3078442,"caller":"app/server.go:112","msg":"Starting HTTP server","port":16686}
+{"level":"info","ts":1579602475.3079286,"caller":"app/server.go:125","msg":"Starting GRPC server","port":16686}

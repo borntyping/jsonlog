@@ -1,0 +1,42 @@
+{"timestamp": "2019-11-08T11:45:27.077235", "level": "INFO", "name": "gunicorn.error", "message": "Starting gunicorn 19.9.0"}
+{"timestamp": "2019-11-08T11:45:27.077767", "level": "INFO", "name": "gunicorn.error", "message": "Listening at: http://0.0.0.0:8000 (1)"}
+{"timestamp": "2019-11-08T11:45:27.077951", "level": "INFO", "name": "gunicorn.error", "message": "Using worker: gthread"}
+{"timestamp": "2019-11-08T11:45:27.080304", "level": "INFO", "name": "gunicorn.error", "message": "Booting worker with pid: 11"}
+{"timestamp": "2019-11-08T11:45:27.086769", "level": "INFO", "name": "gunicorn.error", "message": "Booting worker with pid: 12"}
+{"timestamp": "2019-11-08T11:45:27.601440", "level": "ERROR", "name": "gunicorn.error", "message": "Exception in worker process", "traceback": "Traceback (most recent call last):\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py\", line 583, in spawn_worker\n    worker.init_process()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/workers/gthread.py\", line 104, in init_process\n    super(ThreadWorker, self).init_process()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/workers/base.py\", line 129, in init_process\n    self.load_wsgi()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/workers/base.py\", line 138, in load_wsgi\n    self.wsgi = self.app.wsgi()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/base.py\", line 67, in wsgi\n    self.callable = self.load()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/wsgiapp.py\", line 52, in load\n    return self.load_wsgiapp()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/wsgiapp.py\", line 41, in load_wsgiapp\n    return util.import_app(self.app_uri)\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/util.py\", line 362, in import_app\n    app = eval(obj, vars(mod))\n  File \"<string>\", line 1, in <module>\n  File \"/opt/src/darkroom/app.py\", line 105, in create_app\n    return create_app_from_env()\n  File \"/opt/src/darkroom/app.py\", line 77, in create_app_from_env\n    external_url=os.environ[\"EXAMPLE\"],\n  File \"/opt/src/.venv/lib/python3.7/os.py\", line 678, in __getitem__\n    raise KeyError(key) from None\nKeyError: 'EXAMPLE'"}
+{"timestamp": "2019-11-08T11:45:27.601441", "level": "ERROR", "name": "gunicorn.error", "message": "Exception in worker process", "traceback": "Traceback (most recent call last):\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py\", line 583, in spawn_worker\n    worker.init_process()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/workers/gthread.py\", line 104, in init_process\n    super(ThreadWorker, self).init_process()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/workers/base.py\", line 129, in init_process\n    self.load_wsgi()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/workers/base.py\", line 138, in load_wsgi\n    self.wsgi = self.app.wsgi()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/base.py\", line 67, in wsgi\n    self.callable = self.load()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/wsgiapp.py\", line 52, in load\n    return self.load_wsgiapp()\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/wsgiapp.py\", line 41, in load_wsgiapp\n    return util.import_app(self.app_uri)\n  File \"/opt/src/.venv/lib/python3.7/site-packages/gunicorn/util.py\", line 362, in import_app\n    app = eval(obj, vars(mod))\n  File \"<string>\", line 1, in <module>\n  File \"/opt/src/darkroom/app.py\", line 105, in create_app\n    return create_app_from_env()\n  File \"/opt/src/darkroom/app.py\", line 77, in create_app_from_env\n    external_url=os.environ[\"EXAMPLE\"],\n  File \"/opt/src/.venv/lib/python3.7/os.py\", line 678, in __getitem__\n    raise KeyError(key) from None\nKeyError: 'EXAMPLE'"}
+{"timestamp": "2019-11-08T11:45:27.602668", "level": "INFO", "name": "gunicorn.error", "message": "Worker exiting (pid: 11)"}
+{"timestamp": "2019-11-08T11:45:27.602670", "level": "INFO", "name": "gunicorn.error", "message": "Worker exiting (pid: 12)"}
+Traceback (most recent call last):
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 210, in run
+    self.sleep()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 360, in sleep
+    ready = select.select([self.PIPE[0]], [], [], 1.0)
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 245, in handle_chld
+    self.reap_workers()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 525, in reap_workers
+    raise HaltServer(reason, self.WORKER_BOOT_ERROR)
+gunicorn.errors.HaltServer: <HaltServer 'Worker failed to boot.' 3>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/src/.venv/bin/gunicorn", line 8, in <module>
+    sys.exit(run())
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/wsgiapp.py", line 61, in run
+    WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]").run()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/base.py", line 223, in run
+    super(Application, self).run()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/app/base.py", line 72, in run
+    Arbiter(self).run()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 232, in run
+    self.halt(reason=inst.reason, exit_status=inst.exit_status)
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 345, in halt
+    self.stop()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 393, in stop
+    time.sleep(0.1)
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 245, in handle_chld
+    self.reap_workers()
+  File "/opt/src/.venv/lib/python3.7/site-packages/gunicorn/arbiter.py", line 525, in reap_workers
+    raise HaltServer(reason, self.WORKER_BOOT_ERROR)
+gunicorn.errors.HaltServer: <HaltServer 'Worker failed to boot.' 3>

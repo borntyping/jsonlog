@@ -1,0 +1,6 @@
+{"timestamp": "2019-06-25T17:00:56.929526", "level": "DEBUG", "name": "example", "message": "debug level log message"}
+{"timestamp": "2019-06-25T17:00:56.929690", "level": "INFO", "name": "example", "message": "info level log message"}
+{"timestamp": "2019-06-25T17:00:56.929761", "level": "WARNING", "name": "example", "message": "warning level log message"}
+{"timestamp": "2019-06-25T17:00:56.929819", "level": "ERROR", "name": "example", "message": "error level log message"}
+{"timestamp": "2019-06-25T17:00:56.929877", "level": "ERROR", "name": "example", "message": "error level log message with traceback", "traceback": "Traceback (most recent call last):\n  File \"docs/example.py\", line 15, in <module>\n    1 / 0\nZeroDivisionError: division by zero"}
+{"timestamp": "2019-06-25T17:00:56.930077", "level": "CRITICAL", "name": "example", "message": "critical level log message"}
