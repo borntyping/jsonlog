@@ -4,20 +4,19 @@ import dataclasses
 import json
 import logging
 import pathlib
+import sys
 import typing
 
+import jsonlog
 import jsonschema
-import xdg
 
 from .colours import Colour, ColourMap
-from .pattern import KeyValuePattern, Pattern, TemplatePattern
 from .key import Key
+from .pattern import KeyValuePattern, TemplatePattern
 
 log = logging.getLogger(__name__)
 
-DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
-DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
-DEFAULT_CONFIG = {
+DEFAULT_KEYVALUES = {
     "default": KeyValuePattern(multiline_keys=(Key("traceback"), Key("stacktrace"))),
     "elasticsearch": KeyValuePattern(
         priority_keys=(
@@ -32,7 +31,6 @@ DEFAULT_CONFIG = {
         multiline_keys=(Key("stacktrace"),),
         multiline_json=True,
     ),
-    "highlight": TemplatePattern(template="{__message__}"),
     "jsonlog": KeyValuePattern(
         priority_keys=(Key("timestamp"), Key("level"), Key("name"), Key("message")),
         multiline_keys=(Key("traceback"),),
@@ -47,6 +45,9 @@ DEFAULT_CONFIG = {
         level_key=Key("@level"),
         priority_keys=(Key("@timestamp"), Key("@module"), Key("@message")),
     ),
+}
+DEFAULT_TEMPLATES = {
+    "default": TemplatePattern(format="{__line__}"),
 }
 CONFIG_SCHEMA = {
     "type": "object",
@@ -74,43 +75,40 @@ CONFIG_SCHEMA = {
 
 @dataclasses.dataclass()
 class Config:
-    patterns: typing.Dict[str, Pattern]
-    pattern_classes: typing.Dict[str, typing.Type[Pattern]]
+    keyvalues: typing.Dict[str, KeyValuePattern]
+    templates: typing.Dict[str, TemplatePattern]
 
     @classmethod
-    def configure(cls, path: typing.Optional[str]) -> Config:
-        config = Config(
-            patterns=DEFAULT_CONFIG,
-            pattern_classes={
-                "TemplatePattern": TemplatePattern,
-                "KeyValuePattern": KeyValuePattern,
-            },
+    def defaults(cls):
+        return Config(
+            keyvalues=dict(DEFAULT_KEYVALUES), templates=dict(DEFAULT_TEMPLATES),
         )
 
-        if path is not None:
-            log.info(f"Reading configuration from file = {path!r}")
-            config.load(pathlib.Path(path))
-        elif DEFAULT_CONFIG_PATH.exists():
-            log.info(f"Reading configuration from default file = {DEFAULT_CONFIG_PATH}")
-            config.load(DEFAULT_CONFIG_PATH)
+    def load(self, path: typing.Union[None, str, pathlib.Path]) -> None:
+        log.info(f"Loading configuration from file", extra={"path": repr(path)})
+        if path is None:
+            log.info("Path is none, not loading anything")
+            return
 
-        return config
+        path: pathlib.Path = pathlib.Path(path) if isinstance(path, str) else path
 
-    def load(self, path: pathlib.Path) -> None:
+        log.info(f"Reading configuration from file", extra={"path": repr(path)})
         instance = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
-        for k, v in instance.get("patterns", {}).items():
-            cls_name = v.pop("class", "key_value")
-            cls = self.pattern_classes[cls_name]
-            self.patterns[k] = cls(**v)
+
+        for k, v in instance.get("keyvalues", {}).items():
+            self.keyvalues[k] = KeyValuePattern(**v)
+
+        for k, v in instance.get("templates", {}).items():
+            self.templates[k] = TemplatePattern(**v)
 
 
-def ensure_log_path(path: str) -> typing.Optional[str]:
+def configure_logging(path: str) -> None:
     """
     If given a path to a potential logfile, ensure the containing directory exists.
     """
     if path == "-":
-        return None
-
-    pathlib.Path(path).parent.mkdir(exist_ok=True)
-    return path
+        jsonlog.basicConfig(stream=sys.stderr)
+    else:
+        pathlib.Path(path).parent.mkdir(exist_ok=True)
+        jsonlog.basicConfig(filename=path)

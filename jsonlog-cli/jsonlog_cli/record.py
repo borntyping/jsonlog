@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import dataclasses
-import json
-import textwrap
 import typing
 
 import jsonlog
@@ -22,38 +20,22 @@ class RecordDict(dict, typing.Mapping[str, RecordValue]):
 
 @dataclasses.dataclass()
 class Record:
-    message: str
-    json: RecordDict
-
-    def __post_init__(self) -> None:
-        self.json["__json__"] = dict(self.json)
-        self.json["__message__"] = self.message
-
-    @classmethod
-    def from_string(cls, message: str):
-        message = message.strip()
-        try:
-            data = json.loads(message, object_hook=RecordDict)
-        except json.JSONDecodeError as error:
-            excerpt = textwrap.shorten(message, 100)
-            log.exception(f"Could not parse JSON from line {excerpt!r}")
-            raise error
-        return cls(message=message, json=data)
+    line: str
+    data: RecordDict
 
     def keys(self) -> typing.Iterable[str]:
-        return [k for k in self.json.keys() if k not in {"__json__", "__message__"}]
+        return [k for k in self.data.keys()]
 
     def extract(self, key: typing.Optional[str]) -> RecordValue:
         if key is None:
             return None
 
-        if key in self.json:
-            return self.json[key]
-
+        if key in self.data:
+            return self.data[key]
         return self._extract(key)
 
     def _extract(self, key: str) -> RecordValue:
-        result = self.json
+        result = self.data
 
         for k in key.split("."):
             try:
@@ -61,3 +43,17 @@ class Record:
             except KeyError:
                 return None
         return result
+
+    def __getitem__(self, item) -> typing.Any:
+        if item == "__json__":
+            return self.data
+
+        if item == "__line__":
+            return self.line
+
+        return self.data[item]
+
+
+class RecordFormatter(typing.Protocol):
+    def format_record(self, record: Record) -> str:
+        ...

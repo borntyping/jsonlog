@@ -7,29 +7,24 @@ import typing
 
 from .colours import Colour, ColourMap
 from .key import Key
-from .record import Record, RecordKey, RecordValue
+from .record import Record, RecordFormatter, RecordKey, RecordValue
 from .text import wrap_and_style_lines
-from .errorhandler import ErrorHandler
-from .multiline import BufferedJSONStream
 
 Level = typing.Optional[str]
 T = typing.TypeVar("T")
 
 
-@dataclasses.dataclass()
-class Pattern:
-    level_key: Key = Key("level")
-    multiline_keys: typing.Sequence[Key] = ()
-    multiline_json: bool = False
+@dataclasses.dataclass(frozen=True)
+class Pattern(RecordFormatter):
     colours: ColourMap = dataclasses.field(default=ColourMap.default())
+    level_key: Key = dataclasses.field(default=Key("level"))
+    multiline_json: bool = dataclasses.field(default=False)
+    multiline_keys: typing.Sequence[Key] = dataclasses.field(default=())
 
-    def stream(self, stream: typing.Iterable[str]) -> None:
-        if self.multiline_json:
-            stream = BufferedJSONStream(stream)
-
-        with ErrorHandler() as state:
-            for line in stream:
-                state.echo(line, self, color=True)
+    def replace(self: T, **changes: typing.Optional[typing.Any]) -> T:
+        """Return a copy of the pattern with fields replaced."""
+        changes = {k: v for k, v in changes.items() if v}
+        return dataclasses.replace(self, **changes)
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
@@ -72,19 +67,25 @@ class Pattern:
         level = record.extract(self.level_key.name)
         return self.colours.get(level)
 
-    def replace(self: T, **changes: typing.Any) -> T:
-        return dataclasses.replace(self, **changes)
 
-
-@dataclasses.dataclass()
-class TemplatePattern(Pattern):
-    template: str = "{{__message__}}"
+@dataclasses.dataclass(frozen=True)
+class RawPattern(Pattern):
+    def format_record(self, record: Record) -> str:
+        return self.format_message(record)
 
     def format_message(self, record: Record) -> str:
-        return self.highlight_color(record).style(self.template.format_map(record.json))
+        return json.dumps(record.data, indent=None)
 
 
-@dataclasses.dataclass()
+@dataclasses.dataclass(frozen=True)
+class TemplatePattern(Pattern):
+    format: str = "{{__message__}}"
+
+    def format_message(self, record: Record) -> str:
+        return self.highlight_color(record).style(self.format.format_map(record))
+
+
+@dataclasses.dataclass(frozen=True)
 class KeyValuePattern(Pattern):
     # Priority keys are rendered first, and always rendered.
     priority_keys: typing.Sequence[Key] = ()
@@ -145,9 +146,21 @@ class KeyValuePattern(Pattern):
     def format_value(value: str) -> str:
         return repr(value)
 
-    def remove_keys(self, keys: typing.Container[Key]) -> KeyValuePattern:
+    def replace_keys(self, **kwargs: typing.Sequence[str]) -> KeyValuePattern:
+        changes = {a: Key.from_strings(keys) for a, keys in kwargs.items()}
+        return self.replace(**changes)
+
+    def replace_level_key(self, key: typing.Optional[str]):
+        return self.replace(level_ley=Key.from_string(key) if key is not None else None)
+
+    def add_multiline_keys(self, keys: typing.Sequence[str]) -> KeyValuePattern:
+        multiline_keys = Key.from_strings(keys)
+        return self.replace(multiline_keys=(*self.multiline_keys, *multiline_keys))
+
+    def remove_keys(self, keys: typing.Sequence[str]) -> KeyValuePattern:
+        removed_keys = Key.from_strings(keys)
         return self.replace(
-            removed_keys=keys,
-            multiline_keys=[k for k in self.multiline_keys if k not in keys],
-            priority_keys=[k for k in self.priority_keys if k not in keys],
+            removed_keys=[*self.removed_keys, *removed_keys],
+            multiline_keys=[k for k in self.multiline_keys if k not in removed_keys],
+            priority_keys=[k for k in self.priority_keys if k not in removed_keys],
         )

@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 
 from jsonlog_cli.key import Key
-from jsonlog_cli.pattern import Pattern, TemplatePattern
+from jsonlog_cli.pattern import ParsedPattern, TemplatePattern
 from jsonlog_cli.record import Record
 
 
@@ -11,7 +11,7 @@ from jsonlog_cli.record import Record
 class Example:
     line: str
     expected: str
-    pattern: Pattern
+    pattern: ParsedPattern
 
     def record(self):
         return Record.from_string(self.line)
