@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "jsonlog-cli"
+version = "4.0.0"
+authors = ["Sam Clements <sam@borntyping.co.uk>"]
+description = "Convert structured JSON logs to human-readable output"
+homepage = "https://github.com/borntyping/jsonlog/tree/master/jsonlog-cli"
+repository = "https://github.com/borntyping/jsonlog"
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "*"
+jsonlog = "*"
+jsonschema = "*"
+xdg = "*"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+flake8 = "*"
+mypy = "*"
+pytest = "*"
+
+[tool.poetry.scripts]
+jsonlog = 'jsonlog_cli.cli:main'

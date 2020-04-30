@@ -70,6 +70,6 @@ info = ensure_handlers(logging.root.info)
 warning = ensure_handlers(logging.root.warning)
 error = ensure_handlers(logging.root.error)
 critical = ensure_handlers(logging.root.critical)
-fatal = ensure_handlers(logging.root.fatal)
+fatal = ensure_handlers(logging.root.fatal)  # type: ignore
 log = ensure_handlers(logging.root.log)
 exception = ensure_handlers(logging.root.exception)
