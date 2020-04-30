@@ -4,7 +4,8 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-jsonlog-cli = {editable = true,path = "."}
+#jsonlog = {editable = true, path = "."}
+#jsonlog-cli = {editable = true, path = "."}
 
 [dev-packages]
 black = "*"
@@ -16,7 +17,7 @@ pytest = "*"
 twine = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
