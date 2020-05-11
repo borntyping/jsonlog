@@ -17,7 +17,11 @@ streams_argument = click.argument(
 )
 
 
-@click.group(name="jsonlog", context_settings=dict(max_content_width=120))
+@click.group(
+    name="jsonlog",
+    context_settings=dict(max_content_width=120),
+    invoke_without_command=True,
+)
 @click.option(
     "-c",
     "--config",
@@ -38,10 +42,16 @@ streams_argument = click.argument(
 )
 @click.pass_context
 def main(ctx: click.Context, log_path: str, config_path: str) -> None:
+    """
+    Format JSON messages.
+    """
     jsonlog_cli.config.configure_logging(log_path)
 
     ctx.obj = jsonlog_cli.config.Config.defaults()
     ctx.obj.load(config_path)
+
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(keyvalues)
 
 
 @main.command("template")
@@ -70,6 +80,7 @@ def template_formatter(
     template_name: str,
     template_format: str,
 ) -> None:
+    """Format messages as templated lines."""
     template: jsonlog_cli.pattern.TemplatePattern = config.templates[template_name]
     template = template.replace(format=template_format)
 
@@ -80,6 +91,11 @@ def template_formatter(
 @main.command("raw")
 @streams_argument
 def raw_formatter(streams: typing.Sequence[jsonlog_cli.stream.TextStream]) -> None:
+    """
+    Format messages as JSON lines.
+
+    Buffers JSON so messages split over multiple lines will be output as a single line.
+    """
     pattern = jsonlog_cli.pattern.RawPattern()
     stream_cls = jsonlog_cli.stream.BufferedJSONStream
 
@@ -139,7 +155,7 @@ def keyvalues(
     kv_priority_keys: typing.Sequence[str],
     kv_remove_keys: typing.Sequence[str],
 ) -> None:
-    """Format line-delimited JSON log records in a human-readable way."""
+    """Format messages as coloured key=value lines."""
     pattern: jsonlog_cli.pattern.KeyValuePattern = config.keyvalues[kv_name]
     pattern = pattern.add_multiline_keys(kv_multiline_keys_add)
     pattern = pattern.remove_keys(kv_remove_keys)
