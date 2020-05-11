@@ -16,14 +16,14 @@ T = typing.TypeVar("T")
 
 @dataclasses.dataclass(frozen=True)
 class Pattern(RecordFormatter):
-    colours: ColourMap = dataclasses.field(default=ColourMap.default())
+    colours: ColourMap = dataclasses.field(default=ColourMap.default(), repr=False)
     level_key: Key = dataclasses.field(default=Key("level"))
     multiline_json: bool = dataclasses.field(default=False)
     multiline_keys: typing.Sequence[Key] = dataclasses.field(default=())
 
     def replace(self: T, **changes: typing.Optional[typing.Any]) -> T:
         """Return a copy of the pattern with fields replaced."""
-        changes = {k: v for k, v in changes.items() if v}
+        changes = {k: v for k, v in changes.items() if v is not None}
         return dataclasses.replace(self, **changes)
 
     def format_record(self, record: Record) -> str:
