@@ -7,7 +7,6 @@ import jsonlog_cli.config
 import jsonlog_cli.key
 import jsonlog_cli.pattern
 import jsonlog_cli.stream
-import jsonlog_cli.stream
 
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"

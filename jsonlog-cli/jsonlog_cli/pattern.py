@@ -105,7 +105,7 @@ class KeyValuePattern(Pattern):
         }
 
         unknown_keys: typing.Sequence[Key]  # Retain the record's existing order.
-        unknown_keys = [Key(k) for k in record.keys() if Key(k) not in known_keys]
+        unknown_keys = [k for k in record.ordered_keys() if k not in known_keys]
         format_keys = itertools.chain(self.priority_keys, unknown_keys)
 
         pairs = self._record_pairs(record, format_keys)

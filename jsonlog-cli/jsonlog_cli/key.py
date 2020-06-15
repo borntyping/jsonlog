@@ -4,7 +4,7 @@ import dataclasses
 import typing
 
 from jsonlog_cli.colours import Colour
-from jsonlog_cli.record import RecordValue
+from jsonlog_cli.types import Value
 
 
 @dataclasses.dataclass(frozen=True)
@@ -23,13 +23,13 @@ class Key:
     def format_key(self) -> str:
         return f"{self.name}="
 
-    def format_value(self, value: RecordValue) -> str:
+    def format_value(self, value: Value) -> str:
         if self.template is not None:
             return self.template.format(value)
 
         return repr(value)
 
-    def format_pair(self, value: RecordValue, colour: Colour) -> str:
+    def format_pair(self, value: Value, colour: Colour) -> str:
         k = self.format_key()
         v = self.format_value(value)
 

@@ -9,11 +9,8 @@ import typing
 
 import click
 
-import jsonlog.formatter
 import jsonlog_cli.pattern
 import jsonlog_cli.record
-import jsonlog_cli.record
-import jsonlog_cli.text
 import jsonlog_cli.text
 
 log = logging.getLogger(__name__)
@@ -34,7 +31,7 @@ class JSONStream:
     def __init__(self, stream: TextStream) -> None:
         self.stream = stream
 
-    def __iter__(self) -> typing.Iterable[RecordPair]:
+    def __iter__(self) -> typing.Iterator[RecordPair]:
         for line in self.stream:
             yield self.loads(line)
 
@@ -62,7 +59,7 @@ class BufferedJSONStream(JSONStream):
         super().__init__(stream)
         self.buffer = ""
 
-    def __iter__(self) -> typing.Iterable[RecordPair]:
+    def __iter__(self) -> typing.Iterator[RecordPair]:
         self.reset_buffer()
         for line in self.stream:
             # Yield any remaining lines in the buffer if the current
@@ -147,7 +144,9 @@ class StreamHandler:
             self.error = True
             click.echo()
 
-    def echo(self, line: str, data: RecordData) -> None:
+    def echo(
+        self, line: str, data: typing.Optional[jsonlog_cli.record.RecordDict]
+    ) -> None:
         if data is None:
             self.toggle_error_state()
             self.echo_err(line)
@@ -159,7 +158,7 @@ class StreamHandler:
         output = jsonlog_cli.text.wrap_and_style_lines(line, fg="red", dim=True)
         click.echo(output, color=self.color, err=True)
 
-    def echo_out(self, line: str, data: RecordData) -> None:
+    def echo_out(self, line: str, data: jsonlog_cli.record.RecordDict) -> None:
         record = jsonlog_cli.record.Record(line=line.strip(), data=data)
         output = self.formatter.format_record(record)
         click.echo(output, color=self.color, err=False)

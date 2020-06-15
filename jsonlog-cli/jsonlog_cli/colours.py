@@ -6,7 +6,7 @@ import typing
 
 import click
 
-from jsonlog_cli.record import RecordValue
+from jsonlog_cli.types import Value
 
 K = typing.TypeVar("K")
 V = typing.TypeVar("V")
@@ -47,12 +47,12 @@ class Colour:
         return click.style(text, fg=self.fg, bold=self.bold) if self else text
 
 
-ColorMapDefinition = typing.Mapping[RecordValue, typing.Union[Alias, Colour]]
+ColorMapDefinition = typing.Mapping[Value, typing.Union[Alias, Colour]]
 
 
 @dataclasses.dataclass()
 class ColourMap:
-    mapping: typing.Mapping[RecordValue, Colour]
+    mapping: typing.Mapping[Value, Colour]
 
     def __init__(self, mapping: ColorMapDefinition) -> None:
         self.mapping = AliasedDict({self.normalise(k): v for k, v in mapping.items()})
@@ -74,9 +74,9 @@ class ColourMap:
             }
         )
 
-    def get(self, item: RecordValue) -> Colour:
+    def get(self, item: Value) -> Colour:
         return self.mapping.get(self.normalise(item), Colour())
 
     @staticmethod
-    def normalise(value: RecordValue) -> RecordValue:
+    def normalise(value: Value) -> Value:
         return value.casefold() if isinstance(value, str) else value

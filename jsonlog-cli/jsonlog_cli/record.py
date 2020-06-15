@@ -4,6 +4,7 @@ import dataclasses
 import typing
 
 import jsonlog
+from .key import Key
 
 log = jsonlog.getLogger(__name__)
 
@@ -19,12 +20,12 @@ class RecordDict(dict, typing.Mapping[str, RecordValue]):
 
 
 @dataclasses.dataclass()
-class Record:
+class Record(typing.Mapping[str, typing.Any]):
     line: str
     data: RecordDict
 
-    def keys(self) -> typing.Iterable[str]:
-        return [k for k in self.data.keys()]
+    def ordered_keys(self) -> typing.Iterable[Key]:
+        return [Key(k) for k in self.data.keys()]
 
     def extract(self, key: typing.Optional[str]) -> RecordValue:
         if key is None:
@@ -43,6 +44,12 @@ class Record:
             except KeyError:
                 return None
         return result
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> typing.Iterator[str]:
+        return iter(self.data)
 
     def __getitem__(self, item) -> typing.Any:
         if item == "__json__":

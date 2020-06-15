@@ -90,10 +90,10 @@ class Config:
             log.info("Path is none, not loading anything")
             return
 
-        path: pathlib.Path = pathlib.Path(path) if isinstance(path, str) else path
+        p: pathlib.Path = pathlib.Path(path) if isinstance(path, str) else path
 
-        log.info(f"Reading configuration from file", extra={"path": repr(path)})
-        instance = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+        log.info(f"Reading configuration from file", extra={"path": repr(p)})
+        instance = json.loads(p.read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
 
         for k, v in instance.get("keyvalues", {}).items():
