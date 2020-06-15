@@ -3,10 +3,6 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-[packages]
-#jsonlog = {editable = true, path = "."}
-#jsonlog-cli = {editable = true, path = "."}
-
 [dev-packages]
 black = "*"
 coverage = "*"
@@ -15,9 +11,6 @@ keyring = "*"
 mypy = "*"
 pytest = "*"
 twine = "*"
-
-[requires]
-python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
