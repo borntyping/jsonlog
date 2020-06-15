@@ -41,7 +41,7 @@ class JSONStream:
             data = json.loads(string, object_hook=jsonlog_cli.record.RecordDict)
         except json.JSONDecodeError:
             log.exception(
-                f"Could not parse JSON",
+                "Could not parse JSON",
                 extra={"excerpt": textwrap.shorten(string, 100)},
             )
             return string, None

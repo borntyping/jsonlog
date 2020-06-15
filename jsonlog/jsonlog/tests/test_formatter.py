@@ -31,13 +31,13 @@ def test_json_keys(record: logging.LogRecord) -> None:
 def test_json_args(capture: jsonlog.tests.capture.Capture):
     jsonlog.basicConfig()
     logging.warning("%s %s", "Hello", "World")
-    assert f"Hello World" in capture
+    assert "Hello World" in capture
 
 
 def test_json_args_map(capture: jsonlog.tests.capture.Capture):
     jsonlog.basicConfig()
     logging.warning("%(action)s %(thing)s", {"action": "Hello", "thing": "World"})
-    assert f"Hello World" in capture
+    assert "Hello World" in capture
 
 
 def test_json_extra(capture: jsonlog.tests.capture.Capture):

@@ -85,14 +85,14 @@ class Config:
         )
 
     def load(self, path: typing.Union[None, str, pathlib.Path]) -> None:
-        log.info(f"Loading configuration from file", extra={"path": repr(path)})
+        log.info("Loading configuration from file", extra={"path": repr(path)})
         if path is None:
             log.info("Path is none, not loading anything")
             return
 
         p: pathlib.Path = pathlib.Path(path) if isinstance(path, str) else path
 
-        log.info(f"Reading configuration from file", extra={"path": repr(p)})
+        log.info("Reading configuration from file", extra={"path": repr(p)})
         instance = json.loads(p.read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
 
