@@ -7,7 +7,7 @@ from .key import Key
 try:
     from typing import Protocol  # Only available since python 3.8.
 except ImportError:
-    from typing_extensions import Protocol
+    from typing_extensions import Protocol  # type: ignore
 
 log = jsonlog.getLogger(__name__)
 
