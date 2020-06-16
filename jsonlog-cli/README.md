@@ -2,7 +2,7 @@ jsonlog-cli
 ===========
 
 A human readable formatter for JSON logs.
- 
+
 It's built for use with [jsonlog] but will work well with any log format that
 uses line delimited JSON.
 
@@ -45,6 +45,13 @@ colour each line is printed in (defaults to the `level` key).
 ```bash
 jsonlog --format "{timestamp} {message}" docs/example.log
 ```
+
+Compatibility
+-------------
+
+`jsonlog-cli` is written for Python 3.6 and above. Compatibility patches will be
+accepted for Python 3.5 and above, but patches for Python 2 will be rejected.
+
 
 Authors
 -------
