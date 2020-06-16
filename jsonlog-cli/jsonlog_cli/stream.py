@@ -11,13 +11,18 @@ import jsonlog_cli.pattern
 import jsonlog_cli.record
 import jsonlog_cli.text
 
+try:
+    from typing import Protocol  # Only available since python 3.8.
+except ImportError:
+    from typing_extensions import Protocol
+
 log = logging.getLogger(__name__)
 
 RecordData = typing.Optional[jsonlog_cli.record.RecordDict]
 RecordPair = typing.Tuple[str, RecordData]
 
 
-class TextStream(typing.Protocol):
+class TextStream(Protocol):
     def __iter__(self) -> typing.Iterator[str]:
         ...
 
