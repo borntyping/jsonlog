@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import dataclasses
 import typing
 
@@ -13,11 +11,11 @@ class Key:
     template: typing.Optional[str] = dataclasses.field(compare=False, default=None)
 
     @classmethod
-    def from_strings(cls, strings: typing.Sequence[str]) -> typing.Sequence[Key]:
+    def from_strings(cls, strings: typing.Sequence[str]) -> typing.Sequence["Key"]:
         return [cls.from_string(k) for k in strings]
 
     @classmethod
-    def from_string(cls, string: str) -> Key:
+    def from_string(cls, string: str) -> "Key":
         return Key(*string.split("=", 1))
 
     def format_key(self) -> str:

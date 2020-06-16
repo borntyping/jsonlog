@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import dataclasses
 import json
 import logging
@@ -117,7 +115,7 @@ class StreamHandler:
     color: bool = dataclasses.field(default=True)
     error: bool = dataclasses.field(default=False, init=False)
 
-    def __enter__(self) -> StreamHandler:
+    def __enter__(self) -> "StreamHandler":
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import dataclasses
 import itertools
 import json
@@ -146,18 +144,18 @@ class KeyValuePattern(Pattern):
     def format_value(value: str) -> str:
         return repr(value)
 
-    def replace_keys(self, **kwargs: typing.Sequence[str]) -> KeyValuePattern:
+    def replace_keys(self, **kwargs: typing.Sequence[str]) -> "KeyValuePattern":
         changes = {a: Key.from_strings(keys) for a, keys in kwargs.items()}
         return self.replace(**changes)
 
     def replace_level_key(self, key: typing.Optional[str]):
         return self.replace(level_ley=Key.from_string(key) if key is not None else None)
 
-    def add_multiline_keys(self, keys: typing.Sequence[str]) -> KeyValuePattern:
+    def add_multiline_keys(self, keys: typing.Sequence[str]) -> "KeyValuePattern":
         multiline_keys = Key.from_strings(keys)
         return self.replace(multiline_keys=(*self.multiline_keys, *multiline_keys))
 
-    def remove_keys(self, keys: typing.Sequence[str]) -> KeyValuePattern:
+    def remove_keys(self, keys: typing.Sequence[str]) -> "KeyValuePattern":
         removed_keys = Key.from_strings(keys)
         return self.replace(
             removed_keys=[*self.removed_keys, *removed_keys],
