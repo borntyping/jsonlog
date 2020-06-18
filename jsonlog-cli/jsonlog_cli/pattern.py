@@ -149,7 +149,7 @@ class KeyValuePattern(Pattern):
         return self.replace(**changes)
 
     def replace_level_key(self, key: typing.Optional[str]):
-        return self.replace(level_ley=Key.from_string(key) if key is not None else None)
+        return self.replace(level_key=Key.from_string(key) if key is not None else None)
 
     def add_multiline_keys(self, keys: typing.Sequence[str]) -> "KeyValuePattern":
         multiline_keys = Key.from_strings(keys)

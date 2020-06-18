@@ -14,11 +14,11 @@ Usage
 Pass a file as the only argument to `jsonlog`, or read from STDIN by default.
 
 ```bash
-jsonlog docs/example.log
+jsonlog kv docs/example.log
 ```
 
 ```bash
-python docs/example.py | jsonlog
+python docs/example.py | jsonlog kv
 ```
 
 Configuration
@@ -26,24 +26,28 @@ Configuration
 
 See `jsonlog --help` for all options.
 
-Only show timestamps and messages (defaults to `{timestamp} {level} {name} {message}`).
+Only show the `timestamp` and `message` fields:
 
 ```bash
-jsonlog --format "{timestamp} {message}" docs/example.log
+jsonlog kv --key timestamp --key message docs/example.log
+```
+
+```bash
+jsonlog template --format "{timestamp} {message}" docs/example.log
 ```
 
 Configure the keys of multiline values you want to display (can be specified
 multiple times, and defaults to the `traceback` key.)
 
 ```bash
-jsonlog --format "{timestamp} {message}" docs/example.log
+jsonlog kv --key timestamp --key message --multiline-key traceback docs/example.log
 ```
 
 Configure the key to extract and use as the records level, controlling the
 colour each line is printed in (defaults to the `level` key).
 
 ```bash
-jsonlog --format "{timestamp} {message}" docs/example.log
+jsonlog kv --level-key level --key timestamp --key message --multiline-key traceback docs/example.log
 ```
 
 Compatibility
