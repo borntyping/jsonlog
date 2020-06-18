@@ -57,6 +57,46 @@ Only show the `timestamp` and `message` fields:
 jsonlog template --format "{timestamp} {message}" docs/example.log
 ```
 
+Configuration
+-------------
+
+Named "patterns" are supported as a way of collecting a set of options for
+jsonlog's key-value and template modes. If `~/.config/jsonlog/config.json`
+exists, it will be loaded at startup. All fields should be optional.
+
+The example configuration file below creates patterns named `example` and
+`defaults` for the key-value and template modes. The patterns named `example`
+will show the `timestamp` and `message` fields of incoming logs. The patterns
+named `defaults` set all fields to their default values.
+
+```json
+{
+  "keyvalues": {
+    "example": {
+      "priority_keys": ["timestamp", "message"]
+    },
+    "defaults": {
+      "level_key": "level",
+      "multiline_json": false,
+      "multiline_keys": [],
+      "priority_keys": [],
+      "removed_keys": []
+    }
+  },
+  "templates": {
+    "example": {
+      "format": "{timestamp} {message}"
+    },
+    "defaults": {
+      "level_key": "level",
+      "multiline_json": false,
+      "multiline_keys": [],
+      "format": "{timestamp} {message}" 
+    }
+  }
+}
+```
+
 Authors
 -------
 
