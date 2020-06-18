@@ -57,6 +57,12 @@ Only show the `timestamp` and `message` fields:
 jsonlog template --format "{timestamp} {message}" docs/example.log
 ```
 
+Also show a multiline key when it's present:
+
+```bash
+jsonlog template --format "{timestamp} {message}" --multiline-key traceback docs/example.log
+```
+
 Configuration
 -------------
 

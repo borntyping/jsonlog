@@ -65,6 +65,10 @@ class Pattern(RecordFormatter):
         level = record.extract(self.level_key.name)
         return self.colours.get(level)
 
+    def add_multiline_keys(self: T, keys: typing.Sequence[str]) -> T:
+        multiline_keys = Key.from_strings(keys)
+        return self.replace(multiline_keys=(*self.multiline_keys, *multiline_keys))
+
 
 @dataclasses.dataclass(frozen=True)
 class RawPattern(Pattern):
@@ -150,10 +154,6 @@ class KeyValuePattern(Pattern):
 
     def replace_level_key(self, key: typing.Optional[str]):
         return self.replace(level_key=Key.from_string(key) if key is not None else None)
-
-    def add_multiline_keys(self, keys: typing.Sequence[str]) -> "KeyValuePattern":
-        multiline_keys = Key.from_strings(keys)
-        return self.replace(multiline_keys=(*self.multiline_keys, *multiline_keys))
 
     def remove_keys(self, keys: typing.Sequence[str]) -> "KeyValuePattern":
         removed_keys = Key.from_strings(keys)
