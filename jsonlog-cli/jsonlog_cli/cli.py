@@ -25,7 +25,7 @@ streams_argument = click.argument(
     "-c",
     "--config",
     "config_path",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    type=click.Path(file_okay=True, dir_okay=False),
     default=DEFAULT_CONFIG_PATH.as_posix(),
     show_default=True,
     help="Path to a configuration file.",
@@ -46,8 +46,7 @@ def main(ctx: click.Context, log_path: str, config_path: str) -> None:
     """
     jsonlog_cli.config.configure_logging(log_path)
 
-    ctx.obj = jsonlog_cli.config.Config.defaults()
-    ctx.obj.load(config_path)
+    ctx.obj = jsonlog_cli.config.Config.load(config_path)
 
     if ctx.invoked_subcommand is None:
         ctx.invoke(keyvalues)

@@ -77,21 +77,27 @@ class Config:
     templates: typing.Dict[str, TemplatePattern]
 
     @classmethod
-    def defaults(cls):
-        return Config(
-            keyvalues=dict(DEFAULT_KEYVALUES), templates=dict(DEFAULT_TEMPLATES),
+    def load(cls, filename: str) -> "Config":
+        path: pathlib.Path = pathlib.Path(filename)
+        log.info(
+            "Loading configuration from file",
+            extra={"path": str(path), "exists": path.exists()},
+        )
+        config = cls(
+            keyvalues=DEFAULT_KEYVALUES.copy(), templates=DEFAULT_TEMPLATES.copy(),
         )
 
-    def load(self, path: typing.Union[None, str, pathlib.Path]) -> None:
-        log.info("Loading configuration from file", extra={"path": repr(path)})
-        if path is None:
-            log.info("Path is none, not loading anything")
-            return
+        if path.exists():
+            config.read(path)
 
-        p: pathlib.Path = pathlib.Path(path) if isinstance(path, str) else path
+        return config
 
-        log.info("Reading configuration from file", extra={"path": repr(p)})
-        instance = json.loads(p.read_text(encoding="utf-8"))
+    def read(self, path: pathlib.Path) -> None:
+        log.info(
+            "Reading configuration from file",
+            extra={"path": str(path), "exists": path.exists()},
+        )
+        instance = json.loads(path.read_text(encoding="utf-8"))
         jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
 
         for k, v in instance.get("keyvalues", {}).items():
@@ -106,7 +112,7 @@ def configure_logging(path: str) -> None:
     If given a path to a potential logfile, ensure the containing directory exists.
     """
     if path == "-":
-        jsonlog.basicConfig(stream=sys.stderr)
+        jsonlog.basicConfig(level=logging.INFO, stream=sys.stderr)
     else:
         pathlib.Path(path).parent.mkdir(exist_ok=True)
-        jsonlog.basicConfig(filename=path)
+        jsonlog.basicConfig(level=logging.INFO, filename=path)
