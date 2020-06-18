@@ -2,7 +2,7 @@ jsonlog-cli
 ===========
 
 A human readable formatter for JSON logs.
-
+ 
 It's built for use with [jsonlog] but will work well with any log format that
 uses line delimited JSON.
 
@@ -10,6 +10,10 @@ uses line delimited JSON.
 
 Usage
 -----
+
+See `jsonlog --help` for all options.
+
+### Key-value mode
 
 Pass a file as the only argument to `jsonlog`, or read from STDIN by default.
 
@@ -21,19 +25,14 @@ jsonlog kv docs/example.log
 python docs/example.py | jsonlog kv
 ```
 
-Configuration
--------------
-
-See `jsonlog --help` for all options.
+```bash
+cat docs/example.log | jsonlog
+```
 
 Only show the `timestamp` and `message` fields:
 
 ```bash
 jsonlog kv --key timestamp --key message docs/example.log
-```
-
-```bash
-jsonlog template --format "{timestamp} {message}" docs/example.log
 ```
 
 Configure the keys of multiline values you want to display (can be specified
@@ -50,12 +49,13 @@ colour each line is printed in (defaults to the `level` key).
 jsonlog kv --level-key level --key timestamp --key message --multiline-key traceback docs/example.log
 ```
 
-Compatibility
--------------
+### Template mode
 
-`jsonlog-cli` is written for Python 3.6 and above. Compatibility patches will be
-accepted for Python 3.5 and above, but patches for Python 2 will be rejected.
+Only show the `timestamp` and `message` fields:
 
+```bash
+jsonlog template --format "{timestamp} {message}" docs/example.log
+```
 
 Authors
 -------
