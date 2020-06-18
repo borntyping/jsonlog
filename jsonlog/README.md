@@ -41,7 +41,7 @@ The `jsonlog.basicConfig` function accepts slightly different parameters to
 
 The `filename`, `filemode` and `stream` parameters work the same way as their
 equivalents in `logging.basicConfig`, and as such `filename` and `stream` are
-exclusive. 
+exclusive.
 
 ```python
 import jsonlog
@@ -60,7 +60,7 @@ jsonlog.basicConfig(
 ### Configuration using `logging.config.dictConfig`
 
 Any of the configuration methods in `logging.config` can be used to configure a
-handler that uses `jsonlog.formmatters.JSONFormatter` to format records as JSON. 
+handler that uses `jsonlog.formmatters.JSONFormatter` to format records as JSON.
 
 ```python
 import logging.config
@@ -140,12 +140,12 @@ Traceback (most recent call last):
   File "examples/error.py", line 6, in <module>
     raise ValueError("Example exception")
 ValueError: Example exception
-``` 
+```
 
 Compatibility
 -------------
 
-`jsonlog` is written for Python 3.7 and above. Compatibility patches will be
+`jsonlog` is written for Python 3.6 and above. Compatibility patches will be
 accepted for Python 3.5 and above, but patches for Python 2 will be rejected.
 
 References

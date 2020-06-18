@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import collections
 import dataclasses
 import typing
@@ -58,11 +56,11 @@ class ColourMap:
         self.mapping = AliasedDict({self.normalise(k): v for k, v in mapping.items()})
 
     @classmethod
-    def empty(cls) -> ColourMap:
+    def empty(cls) -> "ColourMap":
         return cls({})
 
     @classmethod
-    def default(cls) -> ColourMap:
+    def default(cls) -> "ColourMap":
         return cls(
             {
                 "info": Colour(fg="cyan"),

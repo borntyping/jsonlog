@@ -1,10 +1,13 @@
-from __future__ import annotations
-
 import dataclasses
 import typing
 
 import jsonlog
 from .key import Key
+
+try:
+    from typing import Protocol  # Only available since python 3.8.
+except ImportError:
+    from typing_extensions import Protocol  # type: ignore
 
 log = jsonlog.getLogger(__name__)
 
@@ -61,6 +64,6 @@ class Record(typing.Mapping[str, typing.Any]):
         return self.data[item]
 
 
-class RecordFormatter(typing.Protocol):
+class RecordFormatter(Protocol):
     def format_record(self, record: Record) -> str:
         ...

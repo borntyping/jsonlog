@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import dataclasses
 import json
 import logging
@@ -13,13 +11,18 @@ import jsonlog_cli.pattern
 import jsonlog_cli.record
 import jsonlog_cli.text
 
+try:
+    from typing import Protocol  # Only available since python 3.8.
+except ImportError:
+    from typing_extensions import Protocol  # type: ignore
+
 log = logging.getLogger(__name__)
 
 RecordData = typing.Optional[jsonlog_cli.record.RecordDict]
 RecordPair = typing.Tuple[str, RecordData]
 
 
-class TextStream(typing.Protocol):
+class TextStream(Protocol):
     def __iter__(self) -> typing.Iterator[str]:
         ...
 
@@ -117,7 +120,7 @@ class StreamHandler:
     color: bool = dataclasses.field(default=True)
     error: bool = dataclasses.field(default=False, init=False)
 
-    def __enter__(self) -> StreamHandler:
+    def __enter__(self) -> "StreamHandler":
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
