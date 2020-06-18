@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jsonlog"
-version = "3.0.0"
+version = "3.1.0"
 authors = ["Sam Clements <sam@borntyping.co.uk>"]
 description = "JSON formatter for the builtin logging module"
 homepage = "https://github.com/borntyping/jsonlog/tree/master/jsonlog"
