@@ -9,7 +9,7 @@ from .record import Record, RecordFormatter, RecordKey, RecordValue
 from .text import wrap_and_style_lines
 
 Level = typing.Optional[str]
-T = typing.TypeVar("T")
+P = typing.TypeVar("P", bound="Pattern")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -19,7 +19,7 @@ class Pattern(RecordFormatter):
     multiline_json: bool = dataclasses.field(default=False)
     multiline_keys: typing.Sequence[Key] = dataclasses.field(default=())
 
-    def replace(self: T, **changes: typing.Optional[typing.Any]) -> T:
+    def replace(self: P, **changes: typing.Optional[typing.Any]) -> P:
         """Return a copy of the pattern with fields replaced."""
         changes = {k: v for k, v in changes.items() if v is not None}
         return dataclasses.replace(self, **changes)
@@ -65,7 +65,7 @@ class Pattern(RecordFormatter):
         level = record.extract(self.level_key.name)
         return self.colours.get(level)
 
-    def add_multiline_keys(self: T, keys: typing.Sequence[str]) -> T:
+    def add_multiline_keys(self: P, keys: typing.Sequence[str]) -> P:
         multiline_keys = Key.from_strings(keys)
         return self.replace(multiline_keys=(*self.multiline_keys, *multiline_keys))
 
