@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 
-from .colours import Colour, ColourMap
+from .colours import Colour
 from .record import Record, RecordKey, RecordValue
 from .text import wrap_and_style_lines
 from .types import Value
@@ -14,7 +14,14 @@ P = typing.TypeVar("P", bound="Pattern")
 
 
 class Pattern(pydantic.BaseModel):
-    colours: ColourMap = ColourMap.default()
+    colours: typing.Mapping[Value, Colour] = {
+        "info": Colour(fg="cyan"),
+        "warning": Colour(fg="yellow"),
+        "warn": Colour(fg="yellow"),
+        "error": Colour(fg="red"),
+        "critical": Colour(fg="red", bold=True),
+        "fatal": Colour(fg="red", bold=True),
+    }
     level_key: str = "level"
     multiline_json: bool = False
     multiline_keys: typing.Sequence[str] = ()
@@ -61,13 +68,24 @@ class Pattern(pydantic.BaseModel):
         return json.dumps(value, indent=2)
 
     def highlight_color(self, record: Record) -> Colour:
-        return self.colours.get(record.extract(self.level_key))
+        return self.colour(record.extract(self.level_key))
 
     def add_multiline_keys(self: P, multiline_keys: typing.Sequence[str]) -> P:
         return self.replace(multiline_keys=(*self.multiline_keys, *multiline_keys))
 
     def is_multiline_json(self) -> bool:
         return self.multiline_json
+
+    def colour(self, value: Value) -> Colour:
+        if value in self.colours:
+            return self.colours[value]
+
+        if isinstance(value, str):
+            normalised = value.casefold()
+            if normalised in self.colours:
+                return self.colours[normalised]
+
+        return Colour()
 
 
 class RawPattern(Pattern):

@@ -4,18 +4,19 @@ import pathlib
 import sys
 import typing
 
-import jsonschema
 import pydantic
 
 import jsonlog
-from .colours import Colour, ColourMap
-from .pattern import KeyValuePattern, TemplatePattern
+import jsonlog_cli.colours
+import jsonlog_cli.pattern
 
 log = logging.getLogger(__name__)
 
 DEFAULT_KEYVALUES = {
-    "default": KeyValuePattern(multiline_keys=("traceback", "stacktrace")),
-    "elasticsearch": KeyValuePattern(
+    "default": jsonlog_cli.pattern.KeyValuePattern(
+        multiline_keys=("traceback", "stacktrace")
+    ),
+    "elasticsearch": jsonlog_cli.pattern.KeyValuePattern(
         priority_keys=(
             "timestamp",
             "level",
@@ -28,22 +29,27 @@ DEFAULT_KEYVALUES = {
         multiline_keys=("stacktrace",),
         multiline_json=True,
     ),
-    "jsonlog": KeyValuePattern(
+    "jsonlog": jsonlog_cli.pattern.KeyValuePattern(
         priority_keys=("timestamp", "level", "name", "message"),
         multiline_keys=("traceback",),
     ),
-    "snyk": KeyValuePattern(
+    "snyk": jsonlog_cli.pattern.KeyValuePattern(
         priority_keys=("time", "msg", "reason.response.body.message"),
         multiline_keys=("__json__",),
-        colours=ColourMap({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
+        colours={
+            20: jsonlog_cli.colours.Colour(fg="cyan"),
+            50: jsonlog_cli.colours.Colour(fg="red"),
+        },
     ),
-    "jaeger": KeyValuePattern(multiline_keys=("errorVerbose", "stacktrace")),
-    "vault": KeyValuePattern(
+    "jaeger": jsonlog_cli.pattern.KeyValuePattern(
+        multiline_keys=("errorVerbose", "stacktrace")
+    ),
+    "vault": jsonlog_cli.pattern.KeyValuePattern(
         level_key="@level", priority_keys=("@timestamp", "@module", "@message"),
     ),
 }
 DEFAULT_TEMPLATES = {
-    "default": TemplatePattern(format="{__line__}"),
+    "default": jsonlog_cli.pattern.TemplatePattern(format="{__line__}"),
 }
 CONFIG_SCHEMA = {
     "type": "object",
@@ -70,8 +76,8 @@ CONFIG_SCHEMA = {
 
 
 class Config(pydantic.BaseModel):
-    keyvalues: typing.Dict[str, KeyValuePattern]
-    templates: typing.Dict[str, TemplatePattern]
+    keyvalues: typing.Dict[str, jsonlog_cli.pattern.KeyValuePattern]
+    templates: typing.Dict[str, jsonlog_cli.pattern.TemplatePattern]
 
     @classmethod
     def load(cls, filename: str) -> "Config":
@@ -85,23 +91,19 @@ class Config(pydantic.BaseModel):
         )
 
         if path.exists():
-            config.read(path)
+            loaded = config.read(path)
+            config.templates.update(loaded)
+            config.keyvalues.update(loaded.keyvalues)
 
         return config
 
-    def read(self, path: pathlib.Path) -> None:
+    @staticmethod
+    def read(path: pathlib.Path) -> "Config":
         log.info(
             "Reading configuration from file",
             extra={"path": str(path), "exists": path.exists()},
         )
-        instance = json.loads(path.read_text(encoding="utf-8"))
-        jsonschema.validate(instance=instance, schema=CONFIG_SCHEMA)
-
-        for k, v in instance.get("keyvalues", {}).items():
-            self.keyvalues[k] = KeyValuePattern(**v)
-
-        for k, v in instance.get("templates", {}).items():
-            self.templates[k] = TemplatePattern(**v)
+        return Config(**json.loads(path.read_text(encoding="utf-8")))
 
 
 def configure_logging(path: str) -> None:
