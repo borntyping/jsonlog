@@ -108,6 +108,12 @@ pattern.
 }
 ```
 
+The `multiline_json` option will parse incoming data using a buffer. This is
+rarely useful, but some applications (e.g. ElasticSearch) output JSON split 
+across multiple lines. Incoming data will be buffered until the whole buffer can
+be parsed as JSON or a new line starts with `{`. Incoming lines that can be
+immediately parsed as JSON are not buffered (flushing the buffer first). 
+
 Authors
 -------
 
