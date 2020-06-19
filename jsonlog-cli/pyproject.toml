@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jsonlog-cli"
-version = "5.2.0"
+version = "6.0.0"
 authors = ["Sam Clements <sam@borntyping.co.uk>"]
 description = "Convert structured JSON logs to human-readable output"
 homepage = "https://github.com/borntyping/jsonlog/tree/master/jsonlog-cli"
