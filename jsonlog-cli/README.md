@@ -70,18 +70,23 @@ Named "patterns" are supported as a way of collecting a set of options for
 jsonlog's key-value and template modes. If `~/.config/jsonlog/config.json`
 exists, it will be loaded at startup. All fields should be optional.
 
-The example configuration file below creates patterns named `example` and
-`defaults` for the key-value and template modes. The patterns named `example`
-will show the `timestamp` and `message` fields of incoming logs. The patterns
-named `defaults` set all fields to their default values.
+The example configuration file below creates patterns named `basic` and
+`comprehensive` for the key-value and template modes. The patterns will each
+show the `timestamp` and `message` fields of incoming logs. The patterns
+named `comprehensive` override all fields, setting their their default values.
+
+Creating a pattern named `default` will set the default options used if no
+pattern is specified. Command line options always override options from the
+application's default configuration, the configuration file and the selected
+pattern.  
 
 ```json
 {
   "keyvalues": {
-    "example": {
+    "basic": {
       "priority_keys": ["timestamp", "message"]
     },
-    "defaults": {
+    "comprehensive": {
       "level_key": "level",
       "multiline_json": false,
       "multiline_keys": [],
@@ -90,10 +95,10 @@ named `defaults` set all fields to their default values.
     }
   },
   "templates": {
-    "example": {
+    "basic": {
       "format": "{timestamp} {message}"
     },
-    "defaults": {
+    "comprehensive": {
       "level_key": "level",
       "multiline_json": false,
       "multiline_keys": [],
