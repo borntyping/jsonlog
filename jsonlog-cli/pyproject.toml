@@ -9,10 +9,10 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.6"
 click = "*"
 jsonlog = "*"
-jsonschema = "*"
+pydantic = "*"
+python = "^3.6"
 typing-extensions = "*; python_version<3.8"
 xdg = "*"
 

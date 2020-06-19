@@ -1,8 +1,8 @@
 import collections
-import dataclasses
 import typing
 
 import click
+import pydantic
 
 from jsonlog_cli.types import Value
 
@@ -10,8 +10,7 @@ K = typing.TypeVar("K")
 V = typing.TypeVar("V")
 
 
-@dataclasses.dataclass()
-class Alias(typing.Generic[K]):
+class Alias(pydantic.BaseModel, typing.Generic[K]):
     name: K
 
 
@@ -33,8 +32,7 @@ class AliasedDict(collections.UserDict, typing.Mapping[K, V]):
         return value
 
 
-@dataclasses.dataclass()
-class Colour:
+class Colour(pydantic.BaseModel):
     fg: typing.Optional[str] = None
     bold: typing.Optional[bool] = None
 
@@ -48,12 +46,13 @@ class Colour:
 ColorMapDefinition = typing.Mapping[Value, typing.Union[Alias, Colour]]
 
 
-@dataclasses.dataclass()
-class ColourMap:
+class ColourMap(pydantic.BaseModel):
     mapping: typing.Mapping[Value, Colour]
 
     def __init__(self, mapping: ColorMapDefinition) -> None:
-        self.mapping = AliasedDict({self.normalise(k): v for k, v in mapping.items()})
+        super().__init__(
+            mapping=AliasedDict({self.normalise(k): v for k, v in mapping.items()})
+        )
 
     @classmethod
     def empty(cls) -> "ColourMap":
@@ -65,10 +64,10 @@ class ColourMap:
             {
                 "info": Colour(fg="cyan"),
                 "warning": Colour(fg="yellow"),
-                "warn": Alias("warning"),
+                "warn": Alias(name="warning"),
                 "error": Colour(fg="red"),
                 "critical": Colour(fg="red", bold=True),
-                "fatal": Alias("critical"),
+                "fatal": Alias(name="critical"),
             }
         )
 

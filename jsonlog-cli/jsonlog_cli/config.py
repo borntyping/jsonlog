@@ -1,47 +1,45 @@
-import dataclasses
 import json
 import logging
 import pathlib
 import sys
 import typing
 
-import jsonlog
 import jsonschema
+import pydantic
 
+import jsonlog
 from .colours import Colour, ColourMap
-from .key import Key
 from .pattern import KeyValuePattern, TemplatePattern
 
 log = logging.getLogger(__name__)
 
 DEFAULT_KEYVALUES = {
-    "default": KeyValuePattern(multiline_keys=(Key("traceback"), Key("stacktrace"))),
+    "default": KeyValuePattern(multiline_keys=("traceback", "stacktrace")),
     "elasticsearch": KeyValuePattern(
         priority_keys=(
-            Key("timestamp"),
-            Key("level"),
-            Key("type"),
-            Key("component"),
-            Key("cluster.name"),
-            Key("node.name"),
-            Key("message"),
+            "timestamp",
+            "level",
+            "type",
+            "component",
+            "cluster.name",
+            "node.name",
+            "message",
         ),
-        multiline_keys=(Key("stacktrace"),),
+        multiline_keys=("stacktrace",),
         multiline_json=True,
     ),
     "jsonlog": KeyValuePattern(
-        priority_keys=(Key("timestamp"), Key("level"), Key("name"), Key("message")),
-        multiline_keys=(Key("traceback"),),
+        priority_keys=("timestamp", "level", "name", "message"),
+        multiline_keys=("traceback",),
     ),
     "snyk": KeyValuePattern(
-        priority_keys=(Key("time"), Key("msg"), Key("reason.response.body.message")),
-        multiline_keys=(Key("__json__"),),
+        priority_keys=("time", "msg", "reason.response.body.message"),
+        multiline_keys=("__json__",),
         colours=ColourMap({20: Colour(fg="cyan"), 50: Colour(fg="red")}),
     ),
-    "jaeger": KeyValuePattern(multiline_keys=(Key("errorVerbose"), Key("stacktrace"))),
+    "jaeger": KeyValuePattern(multiline_keys=("errorVerbose", "stacktrace")),
     "vault": KeyValuePattern(
-        level_key=Key("@level"),
-        priority_keys=(Key("@timestamp"), Key("@module"), Key("@message")),
+        level_key="@level", priority_keys=("@timestamp", "@module", "@message"),
     ),
 }
 DEFAULT_TEMPLATES = {
@@ -71,8 +69,7 @@ CONFIG_SCHEMA = {
 }
 
 
-@dataclasses.dataclass()
-class Config:
+class Config(pydantic.BaseModel):
     keyvalues: typing.Dict[str, KeyValuePattern]
     templates: typing.Dict[str, TemplatePattern]
 

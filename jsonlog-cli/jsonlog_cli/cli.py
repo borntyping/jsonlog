@@ -4,7 +4,6 @@ import click
 import xdg
 
 import jsonlog_cli.config
-import jsonlog_cli.key
 import jsonlog_cli.pattern
 import jsonlog_cli.stream
 
@@ -92,7 +91,7 @@ def template_formatter(
     template = template.replace(format=template_format)
     template = template.add_multiline_keys(template_multiline_keys)
 
-    with jsonlog_cli.stream.StreamHandler(template) as handler:
+    with jsonlog_cli.stream.StreamHandler(pattern=template) as handler:
         handler.consume(streams)
 
 
@@ -104,10 +103,8 @@ def raw_formatter(streams: typing.Sequence[jsonlog_cli.stream.TextStream]) -> No
 
     Buffers JSON so messages split over multiple lines will be output as a single line.
     """
-    pattern = jsonlog_cli.pattern.RawPattern()
-    stream_cls = jsonlog_cli.stream.BufferedJSONStream
-
-    with jsonlog_cli.stream.StreamHandler(pattern, stream_cls) as handler:
+    pattern = jsonlog_cli.pattern.RawPattern(multiline_json=True)
+    with jsonlog_cli.stream.StreamHandler(pattern=pattern) as handler:
         handler.consume(streams)
 
 
@@ -167,8 +164,17 @@ def keyvalues(
     pattern: jsonlog_cli.pattern.KeyValuePattern = config.keyvalues[kv_name]
     pattern = pattern.add_multiline_keys(kv_multiline_keys)
     pattern = pattern.remove_keys(kv_remove_keys)
-    pattern = pattern.replace_keys(priority_keys=kv_priority_keys)
-    pattern = pattern.replace_level_key(kv_level_key)
+    pattern = pattern.replace(priority_keys=kv_priority_keys)
+    pattern = pattern.replace(level_key=kv_level_key)
 
-    with jsonlog_cli.stream.StreamHandler(pattern) as handler:
+    with jsonlog_cli.stream.StreamHandler(pattern=pattern) as handler:
         handler.consume(streams)
+
+
+@main.command("config")
+@click.pass_obj
+def show_config(config: jsonlog_cli.config.Config) -> None:
+    """
+    Show configuration.
+    """
+    print(config.json(indent=2))

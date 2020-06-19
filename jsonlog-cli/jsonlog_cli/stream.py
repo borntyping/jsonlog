@@ -1,4 +1,3 @@
-import dataclasses
 import json
 import logging
 import sys
@@ -27,14 +26,13 @@ class TextStream(Protocol):
         ...
 
 
-@dataclasses.dataclass(init=False)
 class JSONStream:
     stream: TextStream
 
-    def __init__(self, stream: TextStream) -> None:
+    def __init__(self, stream: TextStream):
         self.stream = stream
 
-    def __iter__(self) -> typing.Iterator[RecordPair]:
+    def consume(self) -> typing.Iterator[RecordPair]:
         for line in self.stream:
             yield self.loads(line)
 
@@ -52,17 +50,16 @@ class JSONStream:
             return string, data
 
 
-@dataclasses.dataclass(init=False)
 class BufferedJSONStream(JSONStream):
     """Collect lines until the buffer can be parsed as a JSON document."""
 
     buffer: str = ""
 
     def __init__(self, stream: TextStream) -> None:
-        super().__init__(stream)
+        super().__init__(stream=stream)
         self.buffer = ""
 
-    def __iter__(self) -> typing.Iterator[RecordPair]:
+    def consume(self) -> typing.Iterator[RecordPair]:
         self.reset_buffer()
         for line in self.stream:
             # Yield any remaining lines in the buffer if the current
@@ -104,7 +101,6 @@ class BufferedJSONStream(JSONStream):
             return True
 
 
-@dataclasses.dataclass()
 class StreamHandler:
     """
     Track the state of lines surrounding text we want to separate.
@@ -112,13 +108,16 @@ class StreamHandler:
     Used when we print lines that didn't parse as JSON.
     """
 
-    formatter: jsonlog_cli.record.RecordFormatter
-    json_stream_class: typing.Type[JSONStream] = dataclasses.field(
-        default=BufferedJSONStream
-    )
+    pattern: jsonlog_cli.pattern.Pattern
+    color: bool
+    error: bool
 
-    color: bool = dataclasses.field(default=True)
-    error: bool = dataclasses.field(default=False, init=False)
+    def __init__(
+        self, pattern: jsonlog_cli.pattern.Pattern, color: bool = True
+    ) -> None:
+        self.pattern = pattern
+        self.color = color
+        self.error = False
 
     def __enter__(self) -> "StreamHandler":
         return self
@@ -126,15 +125,19 @@ class StreamHandler:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.toggle_normal_state()
 
+    @property
+    def json_stream_class(self) -> typing.Type[JSONStream]:
+        return BufferedJSONStream if self.pattern.is_multiline_json() else JSONStream
+
     def consume(self, streams: typing.Sequence[TextStream] = ()) -> None:
         text_streams = streams or (sys.stdin,)
-        json_streams = [self.json_stream_class(s) for s in text_streams]
+        json_streams = [self.json_stream_class(stream=s) for s in text_streams]
 
         for stream in json_streams:
             self.consume_stream(stream)
 
     def consume_stream(self, stream: JSONStream) -> None:
-        for line, data in stream:
+        for line, data in stream.consume():
             self.echo(line, data)
 
     def toggle_normal_state(self) -> None:
@@ -163,5 +166,5 @@ class StreamHandler:
 
     def echo_out(self, line: str, data: jsonlog_cli.record.RecordDict) -> None:
         record = jsonlog_cli.record.Record(line=line.strip(), data=data)
-        output = self.formatter.format_record(record)
+        output = self.pattern.format_record(record)
         click.echo(output, color=self.color, err=False)

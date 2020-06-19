@@ -1,13 +1,7 @@
-import dataclasses
 import typing
 
 import jsonlog
-from .key import Key
 
-try:
-    from typing import Protocol  # Only available since python 3.8.
-except ImportError:
-    from typing_extensions import Protocol  # type: ignore
 
 log = jsonlog.getLogger(__name__)
 
@@ -22,13 +16,16 @@ class RecordDict(dict, typing.Mapping[str, RecordValue]):
         return self[item]
 
 
-@dataclasses.dataclass()
 class Record(typing.Mapping[str, typing.Any]):
     line: str
     data: RecordDict
 
-    def ordered_keys(self) -> typing.Iterable[Key]:
-        return [Key(k) for k in self.data.keys()]
+    def __init__(self, line: str, data: RecordDict) -> None:
+        self.line = line
+        self.data = data
+
+    def ordered_keys(self) -> typing.Iterable[str]:
+        return self.data.keys()
 
     def extract(self, key: typing.Optional[str]) -> RecordValue:
         if key is None:
@@ -62,8 +59,3 @@ class Record(typing.Mapping[str, typing.Any]):
             return self.line
 
         return self.data[item]
-
-
-class RecordFormatter(Protocol):
-    def format_record(self, record: Record) -> str:
-        ...

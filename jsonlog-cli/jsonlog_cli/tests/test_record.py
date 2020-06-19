@@ -1,15 +1,12 @@
-import dataclasses
-
+import pydantic
 import pytest
 
-from jsonlog_cli.key import Key
 from jsonlog_cli.pattern import Pattern, TemplatePattern
 from jsonlog_cli.record import Record
 from jsonlog_cli.stream import JSONStream
 
 
-@dataclasses.dataclass()
-class Example:
+class Example(pydantic.BaseModel):
     line: str
     expected: str
     pattern: Pattern
@@ -36,7 +33,7 @@ class Example:
         Example(
             line='{"message": "Hello World 3", "level": "CRITICAL"}',
             expected="\x1b[31m\x1b[1mCRITICAL Hello World 3\x1b[0m",
-            pattern=TemplatePattern(format="{level} {message}", level_key=Key("level")),
+            pattern=TemplatePattern(format="{level} {message}"),
         ),
         # Test nested keys can be used in both the format string and config keys.
         Example(
@@ -44,15 +41,15 @@ class Example:
             expected="\x1b[31m\x1b[1mHello World 4\x1b[0m\n\n    \x1b[2mLorem Ipsum\x1b[0m\n",
             pattern=TemplatePattern(
                 format="{nested.message}",
-                level_key=Key("nested.level"),
-                multiline_keys=(Key("nested.multiline"),),
+                level_key="nested.level",
+                multiline_keys=["nested.multiline"],
             ),
         ),
         # Test nested data renders nicely.
         Example(
             line='{"nested": {"a": 1, "b": "Z", "c": []}}',
             expected='static\n\n    \x1b[2m{\x1b[0m\n    \x1b[2m  "a": 1,\x1b[0m\n    \x1b[2m  "b": "Z",\x1b[0m\n    \x1b[2m  "c": []\x1b[0m\n    \x1b[2m}\x1b[0m\n',
-            pattern=TemplatePattern(format="static", multiline_keys=(Key("nested"),)),
+            pattern=TemplatePattern(format="static", multiline_keys=["nested"]),
         ),
     ],
 )
