@@ -1,3 +1,3 @@
 import typing
 
-Value = typing.Union[None, str, int, float, bool, typing.Sequence, typing.Mapping]
+Value = typing.Union[None, str, int, float, bool, typing.List, typing.Dict]
