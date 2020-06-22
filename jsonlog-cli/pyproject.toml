@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "jsonlog-cli"
-version = "6.0.0"
+version = "6.0.1"
 authors = ["Sam Clements <sam@borntyping.co.uk>"]
 description = "Convert structured JSON logs to human-readable output"
 homepage = "https://github.com/borntyping/jsonlog/tree/master/jsonlog-cli"
