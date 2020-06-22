@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry"]
+build-backend = "poetry.masonry.api"
+
 [tool.poetry]
 name = "jsonlog-cli"
 version = "6.0.0"
