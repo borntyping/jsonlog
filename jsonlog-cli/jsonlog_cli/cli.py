@@ -26,7 +26,7 @@ class AliasedGroup(click.Group):
 
 @click.group(
     name="jsonlog",
-    context_settings=dict(max_content_width=120),
+    context_settings={"max_content_width": 120, "help_option_names": ["-h", "--help"]},
     invoke_without_command=True,
     cls=AliasedGroup,
 )
