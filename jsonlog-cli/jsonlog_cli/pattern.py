@@ -5,7 +5,7 @@ import typing
 import pydantic
 
 from .colours import Colour
-from .record import Record, RecordKey, RecordValue
+from .record import Record
 from .text import wrap_and_style_lines
 from .types import Value
 
@@ -52,7 +52,7 @@ class Pattern(pydantic.BaseModel):
                 yield wrap_and_style_lines(string, dim=True)
 
     @staticmethod
-    def format_multiline_value(value: RecordValue) -> str:
+    def format_multiline_value(value: Value) -> str:
         """
         Transform a JSON value into something we can display in a multiline block.
 
@@ -142,7 +142,7 @@ class KeyValuePattern(Pattern):
 
     def _record_pairs(
         self, record: Record, keys: typing.Iterable[str]
-    ) -> typing.Iterable[typing.Tuple[str, RecordValue]]:
+    ) -> typing.Iterable[typing.Tuple[str, Value]]:
         """
         Iterate over key=value pairs for specific keys in a record.
 
@@ -156,8 +156,8 @@ class KeyValuePattern(Pattern):
                 yield key, value
 
     def _nested_pairs(
-        self, parent: str, data: typing.Mapping[RecordKey, RecordValue]
-    ) -> typing.Iterable[typing.Tuple[str, RecordValue]]:
+        self, parent: str, data: typing.Mapping[str, Value]
+    ) -> typing.Iterable[typing.Tuple[str, Value]]:
         """Iterate over pairs in a mapping, prefixing each key with a "parent" key."""
         for k, v in data.items():
             nested_key = ".".join((parent, k))
