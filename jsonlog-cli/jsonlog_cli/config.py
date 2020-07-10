@@ -92,7 +92,7 @@ class Config(pydantic.BaseModel):
 
         if path.exists():
             loaded = config.read(path)
-            config.templates.update(loaded)
+            config.templates.update(loaded.templates)
             config.keyvalues.update(loaded.keyvalues)
 
         return config
