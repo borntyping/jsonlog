@@ -28,7 +28,7 @@ class Pattern(pydantic.BaseModel):
 
     def replace(self: P, **changes: typing.Optional[typing.Any]) -> P:
         """Return a copy of the pattern with fields replaced."""
-        return self.copy(update={k: v for k, v in changes.items() if v is not None})
+        return self.copy(update={k: v for k, v in changes.items() if v})
 
     def format_record(self, record: Record) -> str:
         message = self.format_message(record)
