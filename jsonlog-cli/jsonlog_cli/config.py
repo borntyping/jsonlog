@@ -76,8 +76,8 @@ CONFIG_SCHEMA = {
 
 
 class Config(pydantic.BaseModel):
-    keyvalues: typing.Dict[str, jsonlog_cli.pattern.KeyValuePattern]
-    templates: typing.Dict[str, jsonlog_cli.pattern.TemplatePattern]
+    keyvalues: typing.Dict[str, jsonlog_cli.pattern.KeyValuePattern] = {}
+    templates: typing.Dict[str, jsonlog_cli.pattern.TemplatePattern] = {}
 
     @classmethod
     def load(cls, filename: str) -> "Config":
