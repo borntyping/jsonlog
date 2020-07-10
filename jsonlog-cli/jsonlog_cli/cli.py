@@ -1,3 +1,4 @@
+import logging
 import typing
 
 import click
@@ -6,6 +7,8 @@ import xdg
 import jsonlog_cli.config
 import jsonlog_cli.pattern
 import jsonlog_cli.stream
+
+log = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = xdg.XDG_CONFIG_HOME / "jsonlog" / "config.json"
 DEFAULT_LOG_PATH = xdg.XDG_CACHE_HOME / "jsonlog" / "internal.log"
@@ -30,20 +33,27 @@ streams_argument = click.argument(
     help="Path to a configuration file.",
 )
 @click.option(
-    "-l",
-    "--log",
+    "--log-path",
     "log_path",
     type=click.Path(file_okay=True, dir_okay=False, allow_dash=True),
     default=DEFAULT_LOG_PATH.as_posix(),
     show_default=True,
     help="Path to write internal logs to.",
 )
+@click.option(
+    "--log-level",
+    "log_level",
+    type=click.STRING,
+    default="warning",
+    show_default=True,
+    help="Log level for internal logs.",
+)
 @click.pass_context
-def main(ctx: click.Context, log_path: str, config_path: str) -> None:
+def main(ctx: click.Context, log_path: str, log_level: str, config_path: str) -> None:
     """
     Format JSON messages.
     """
-    jsonlog_cli.config.configure_logging(log_path)
+    jsonlog_cli.config.configure_logging(log_path, log_level)
 
     ctx.obj = jsonlog_cli.config.Config.load(config_path)
 
@@ -166,6 +176,8 @@ def keyvalues(
     pattern = pattern.remove_keys(kv_remove_keys)
     pattern = pattern.replace(priority_keys=kv_priority_keys)
     pattern = pattern.replace(level_key=kv_level_key)
+
+    log.debug("Selected pattern", extra={"pattern": pattern.dict()})
 
     with jsonlog_cli.stream.StreamHandler(pattern=pattern) as handler:
         handler.consume(streams)

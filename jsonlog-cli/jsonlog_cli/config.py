@@ -106,12 +106,13 @@ class Config(pydantic.BaseModel):
         return Config(**json.loads(path.read_text(encoding="utf-8")))
 
 
-def configure_logging(path: str) -> None:
+def configure_logging(path: str, level: str) -> None:
     """
     If given a path to a potential logfile, ensure the containing directory exists.
     """
+    logging_level = logging._nameToLevel[level.upper()]
     if path == "-":
-        jsonlog.basicConfig(level=logging.INFO, stream=sys.stderr)
+        jsonlog.basicConfig(level=logging_level, stream=sys.stderr)
     else:
         pathlib.Path(path).parent.mkdir(exist_ok=True)
-        jsonlog.basicConfig(level=logging.INFO, filename=path)
+        jsonlog.basicConfig(level=logging_level, filename=path)
