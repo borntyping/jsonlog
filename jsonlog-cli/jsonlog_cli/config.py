@@ -51,28 +51,6 @@ DEFAULT_KEYVALUES = {
 DEFAULT_TEMPLATES = {
     "default": jsonlog_cli.pattern.TemplatePattern(format="{__line__}"),
 }
-CONFIG_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "patterns": {
-            "type": "object",
-            "additionalProperties": {"$ref": "#/definitions/pattern"},
-        }
-    },
-    "definitions": {
-        "pattern": {
-            "$id": "#pattern",
-            "type": "object",
-            "properties": {
-                "template": {"type": "string"},
-                "level_key": {"type": "string"},
-                "priority_keys": {"type": "array", "items": {"type": "string"}},
-                "multiline_keys": {"type": "array", "items": {"type": "string"}},
-                "multiline_json": {"type": "boolean"},
-            },
-        }
-    },
-}
 
 
 class Config(pydantic.BaseModel):
