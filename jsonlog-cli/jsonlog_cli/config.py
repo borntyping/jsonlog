@@ -95,19 +95,15 @@ class Config(pydantic.BaseModel):
         )
 
         if path.exists():
-            loaded = config.read(path)
+            log.info(
+                "Reading configuration from file",
+                extra={"path": str(path), "exists": path.exists()},
+            )
+            loaded = Config.parse_file(path)
             config.templates.update(loaded.templates)
             config.keyvalues.update(loaded.keyvalues)
 
         return config
-
-    @staticmethod
-    def read(path: pathlib.Path) -> "Config":
-        log.info(
-            "Reading configuration from file",
-            extra={"path": str(path), "exists": path.exists()},
-        )
-        return Config(**json.loads(path.read_text(encoding="utf-8")))
 
 
 def configure_logging(path: str, level: str) -> None:
