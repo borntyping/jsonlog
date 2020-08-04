@@ -145,8 +145,12 @@ ValueError: Example exception
 Compatibility
 -------------
 
-`jsonlog` is written for Python 3.6 and above. Compatibility patches will be
+`jsonlog` is written for Python 3.7 and above. Compatibility patches will be
 accepted for Python 3.5 and above, but patches for Python 2 will be rejected.
+
+To use `jsonlog` on Python 3.6 you will need to install the `dataclasses`
+package alongside it. This isn't a dependency as it breaks the builtin
+`dataclasses` module when installed on Python 3.7 and above.
 
 References
 ----------
